@@ -3,17 +3,17 @@ import { build } from "https://deno.land/x/dnt@0.31.0/mod.ts"
 
 await emptyDir("target/npm_pkg")
 
-const DESCRIPTION = "TODO"
+const DESCRIPTION = "A collection of cryptographic utilities written in WAT"
 
 await build({
   entryPoints: ["mod.ts"],
   outDir: "target/npm_pkg",
   package: {
-    name: "TODO",
+    name: "wat-the-crypto",
     version: Deno.args[0]!,
     description: DESCRIPTION,
     sideEffects: false,
-    repository: "github:paritytech/TODO",
+    repository: "github:paritytech/wat-the-crypto",
   },
   shims: {
     deno: {
