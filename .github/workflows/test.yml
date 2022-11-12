@@ -1,0 +1,18 @@
+name: Test
+on: push
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: denoland/setup-deno@9db7f66e8e16b5699a514448ce994936c63f0d54 # v1.1.1
+        with:
+          deno-version: v1.x
+      - name: Download wabt
+        run: |
+          curl -L https://github.com/WebAssembly/wabt/releases/download/1.0.30/wabt-1.0.30-ubuntu.tar.gz | tar -xz -C ~
+          echo "$HOME/wabt-1.0.30/bin" >> $GITHUB_PATH
+      - run: deno task star
+      - run: deno task build --check
+      - run: deno task test

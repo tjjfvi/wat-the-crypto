@@ -1,3 +1,7 @@
 dprint
 hashers
 paritytech
+deno
+denoland
+chiefbiiko
+wabt
