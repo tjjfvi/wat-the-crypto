@@ -15,7 +15,7 @@ const lorem =
 
 const license = await fetch(new URL("../../LICENSE", import.meta.url)).then((r) => r.arrayBuffer())
 
-const testCases: [name: string, data: Uint8Array][] = [
+export const testCases: [name: string, data: Uint8Array][] = [
   ["empty", new Uint8Array()],
   ["[0; 1024]", new Uint8Array(1024)],
   ["0..256", new Uint8Array(Array.from({ length: 256 }, (_, i) => i))],
