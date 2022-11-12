@@ -1,0 +1,61 @@
+export const snapshot = {};
+
+snapshot[`xxhash 512 > empty > reference 1`] = `"99e9d85137db46ef4bbea33613baafd56f963c64b1f3685a4eb4abd67ff6203adb47db9f0e7b8df13bfd1c9806d4e14b99c769b2d80a6fdf09440a6f6f62f095"`;
+
+snapshot[`xxhash 512 > [0; 1024] > reference 1`] = `"cdac85f0882874275d7ee38a70da85e98ed188fdabc8466b923b4e0a88c21e18411f08ee10a208b4dd712c68cfeecf68fabd60b05467e45268807a47a3359f41"`;
+
+snapshot[`xxhash 512 > 0..256 > reference 1`] = `"4b90cd0684beac1ff7566a6db01eecbe796a6681a553fa6f4ca7f8a1da4c7241822eb628b1ece95206ada4385fb1f2d08e2d2f953b2bcc4aa86e0ec82ef633d2"`;
+
+snapshot[`xxhash 512 > lorem > reference 1`] = `"3056764314b1a8c5331511d478ff3f1203586c1a9308a54594234d9956fa6173dde73c6f4d92a266b80f4ea640fc58880baa7ba549315bf42b06d60439cdd4cc"`;
+
+snapshot[`xxhash 512 > license > reference 1`] = `"f8221dfc889a7a5c51aa83f994a21dfcd50ec17435b60d9835bce3c6dfd4f39aa7f95091df2c93cb5f1a5e6a4aa6db95afbf6ee35bcbb915bbfe02625a834561"`;
+
+snapshot[`xxhash 64 > empty > reference 1`] = `"99e9d85137db46ef"`;
+
+snapshot[`xxhash 64 > [0; 1024] > reference 1`] = `"cdac85f088287427"`;
+
+snapshot[`xxhash 64 > 0..256 > reference 1`] = `"4b90cd0684beac1f"`;
+
+snapshot[`xxhash 64 > lorem > reference 1`] = `"3056764314b1a8c5"`;
+
+snapshot[`xxhash 64 > license > reference 1`] = `"f8221dfc889a7a5c"`;
+
+snapshot[`xxhash 128 > empty > reference 1`] = `"99e9d85137db46ef4bbea33613baafd5"`;
+
+snapshot[`xxhash 128 > [0; 1024] > reference 1`] = `"cdac85f0882874275d7ee38a70da85e9"`;
+
+snapshot[`xxhash 128 > 0..256 > reference 1`] = `"4b90cd0684beac1ff7566a6db01eecbe"`;
+
+snapshot[`xxhash 128 > lorem > reference 1`] = `"3056764314b1a8c5331511d478ff3f12"`;
+
+snapshot[`xxhash 128 > license > reference 1`] = `"f8221dfc889a7a5c51aa83f994a21dfc"`;
+
+snapshot[`xxhash 256 > empty > reference 1`] = `"99e9d85137db46ef4bbea33613baafd56f963c64b1f3685a4eb4abd67ff6203a"`;
+
+snapshot[`xxhash 256 > [0; 1024] > reference 1`] = `"cdac85f0882874275d7ee38a70da85e98ed188fdabc8466b923b4e0a88c21e18"`;
+
+snapshot[`xxhash 256 > 0..256 > reference 1`] = `"4b90cd0684beac1ff7566a6db01eecbe796a6681a553fa6f4ca7f8a1da4c7241"`;
+
+snapshot[`xxhash 256 > lorem > reference 1`] = `"3056764314b1a8c5331511d478ff3f1203586c1a9308a54594234d9956fa6173"`;
+
+snapshot[`xxhash 256 > license > reference 1`] = `"f8221dfc889a7a5c51aa83f994a21dfcd50ec17435b60d9835bce3c6dfd4f39a"`;
+
+snapshot[`xxhash 384 > empty > reference 1`] = `"99e9d85137db46ef4bbea33613baafd56f963c64b1f3685a4eb4abd67ff6203adb47db9f0e7b8df13bfd1c9806d4e14b"`;
+
+snapshot[`xxhash 384 > [0; 1024] > reference 1`] = `"cdac85f0882874275d7ee38a70da85e98ed188fdabc8466b923b4e0a88c21e18411f08ee10a208b4dd712c68cfeecf68"`;
+
+snapshot[`xxhash 384 > 0..256 > reference 1`] = `"4b90cd0684beac1ff7566a6db01eecbe796a6681a553fa6f4ca7f8a1da4c7241822eb628b1ece95206ada4385fb1f2d0"`;
+
+snapshot[`xxhash 384 > lorem > reference 1`] = `"3056764314b1a8c5331511d478ff3f1203586c1a9308a54594234d9956fa6173dde73c6f4d92a266b80f4ea640fc5888"`;
+
+snapshot[`xxhash 384 > license > reference 1`] = `"f8221dfc889a7a5c51aa83f994a21dfcd50ec17435b60d9835bce3c6dfd4f39aa7f95091df2c93cb5f1a5e6a4aa6db95"`;
+
+snapshot[`xxhash 512 > empty > reference 2`] = `"99e9d85137db46ef4bbea33613baafd56f963c64b1f3685a4eb4abd67ff6203adb47db9f0e7b8df13bfd1c9806d4e14b99c769b2d80a6fdf09440a6f6f62f095"`;
+
+snapshot[`xxhash 512 > [0; 1024] > reference 2`] = `"cdac85f0882874275d7ee38a70da85e98ed188fdabc8466b923b4e0a88c21e18411f08ee10a208b4dd712c68cfeecf68fabd60b05467e45268807a47a3359f41"`;
+
+snapshot[`xxhash 512 > 0..256 > reference 2`] = `"4b90cd0684beac1ff7566a6db01eecbe796a6681a553fa6f4ca7f8a1da4c7241822eb628b1ece95206ada4385fb1f2d08e2d2f953b2bcc4aa86e0ec82ef633d2"`;
+
+snapshot[`xxhash 512 > lorem > reference 2`] = `"3056764314b1a8c5331511d478ff3f1203586c1a9308a54594234d9956fa6173dde73c6f4d92a266b80f4ea640fc58880baa7ba549315bf42b06d60439cdd4cc"`;
+
+snapshot[`xxhash 512 > license > reference 2`] = `"f8221dfc889a7a5c51aa83f994a21dfcd50ec17435b60d9835bce3c6dfd4f39aa7f95091df2c93cb5f1a5e6a4aa6db95afbf6ee35bcbb915bbfe02625a834561"`;

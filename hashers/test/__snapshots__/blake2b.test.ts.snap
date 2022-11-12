@@ -1,0 +1,71 @@
+export const snapshot = {};
+
+snapshot[`blake2b 512 > empty > reference 1`] = `"786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce"`;
+
+snapshot[`blake2b 512 > [0; 1024] > reference 1`] = `"b4b72b45c308e963f4c927827426228c0ed898403411ad108fbd0611e146ccd494bda4b9a593c33d7cf49931748e8bc29a829d50e904305cb38dfb1443532ef7"`;
+
+snapshot[`blake2b 512 > 0..256 > reference 1`] = `"1ecc896f34d3f9cac484c73f75f6a5fb58ee6784be41b35f46067b9c65c63a6794d3d744112c653f73dd7deb6666204c5a9bfa5b46081fc10fdbe7884fa5cbf8"`;
+
+snapshot[`blake2b 512 > lorem > reference 1`] = `"bf6a2cf4132a6436f90190ebbf436dd622a73294d44348046c32504c224aaa3d1c80ca83107eb9548ccba36e141183b3bfb0f38779c0d9ab76b5971590e79d5e"`;
+
+snapshot[`blake2b 512 > license > reference 1`] = `"992fa23952ba982b26a74a176c9602c4e4e9e1dc60dacf04df6f33bf631964b70c676c98a73270a4356abdad2a38709ac8a930460e84f101dc5cdfd3e7cccf1a"`;
+
+snapshot[`blake2b 8 > empty > reference 1`] = `"2e"`;
+
+snapshot[`blake2b 8 > [0; 1024] > reference 1`] = `"ed"`;
+
+snapshot[`blake2b 8 > 0..256 > reference 1`] = `"31"`;
+
+snapshot[`blake2b 8 > lorem > reference 1`] = `"f7"`;
+
+snapshot[`blake2b 8 > license > reference 1`] = `"71"`;
+
+snapshot[`blake2b 16 > empty > reference 1`] = `"b1fe"`;
+
+snapshot[`blake2b 16 > [0; 1024] > reference 1`] = `"2765"`;
+
+snapshot[`blake2b 16 > 0..256 > reference 1`] = `"8c4d"`;
+
+snapshot[`blake2b 16 > lorem > reference 1`] = `"b3cf"`;
+
+snapshot[`blake2b 16 > license > reference 1`] = `"7687"`;
+
+snapshot[`blake2b 32 > empty > reference 1`] = `"1271cf25"`;
+
+snapshot[`blake2b 32 > [0; 1024] > reference 1`] = `"0cd38b2c"`;
+
+snapshot[`blake2b 32 > 0..256 > reference 1`] = `"0f2e5c3b"`;
+
+snapshot[`blake2b 32 > lorem > reference 1`] = `"1ac49e34"`;
+
+snapshot[`blake2b 32 > license > reference 1`] = `"2d5fdc03"`;
+
+snapshot[`blake2b 64 > empty > reference 1`] = `"e4a6a0577479b2b4"`;
+
+snapshot[`blake2b 64 > [0; 1024] > reference 1`] = `"cc6d171260b47f4c"`;
+
+snapshot[`blake2b 64 > 0..256 > reference 1`] = `"2b2cedfed655ad3f"`;
+
+snapshot[`blake2b 64 > lorem > reference 1`] = `"4c88d05abcf28cc9"`;
+
+snapshot[`blake2b 64 > license > reference 1`] = `"a3fa5fbc7ae44daa"`;
+
+snapshot[`blake2b 128 > empty > reference 1`] = `"cae66941d9efbd404e4d88758ea67670"`;
+
+snapshot[`blake2b 128 > [0; 1024] > reference 1`] = `"b369bf5cbc592281f47f17906c077fe2"`;
+
+snapshot[`blake2b 128 > 0..256 > reference 1`] = `"c2472c0ac37a8dbdb25f05ada0d82643"`;
+
+snapshot[`blake2b 128 > lorem > reference 1`] = `"2f4ed80c9a9bd02ea97ff9bde5a1c89f"`;
+
+snapshot[`blake2b 128 > license > reference 1`] = `"be52669a304127adc627508500703483"`;
+
+snapshot[`blake2b 256 > empty > reference 1`] = `"0e5751c026e543b2e8ab2eb06099daa1d1e5df47778f7787faab45cdf12fe3a8"`;
+
+snapshot[`blake2b 256 > [0; 1024] > reference 1`] = `"347ebd71659fe9f2bc7c182fb475b03112785953498185042565590a1bfb89a2"`;
+
+snapshot[`blake2b 256 > 0..256 > reference 1`] = `"39a7eb9fedc19aabc83425c6755dd90e6f9d0c804964a1f4aaeea3b9fb599835"`;
+
+snapshot[`blake2b 256 > lorem > reference 1`] = `"d6d9034f61e2f7ada6e58c252e15684c8df7f0b197a95d80f42ca0a3685de26e"`;
+
+snapshot[`blake2b 256 > license > reference 1`] = `"3ee00dfbab41f09838f0444605dbef691486244f4ca29f90957a894b44153663"`;
