@@ -1,0 +1,38 @@
+name: Release
+on:
+  release:
+    types:
+      - created
+jobs:
+  publish:
+    name: Build & Publish to NPM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: denoland/setup-deno@004814556e37c54a2f6e31384c9e18e983317366 # v1.1.0
+        with:
+          deno-version: v1.x
+      - name: Retrieve Version
+        if: startsWith(github.ref, 'refs/tags/')
+        id: get_tag_version
+        run: echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+          registry-url: "https://registry.npmjs.org"
+      - name: Build NPM Package
+        run: deno run -A --no-check=remote ./_tasks/dnt.ts ${{steps.get_tag_version.outputs.TAG_VERSION}}
+      - run: npm pack
+        working-directory: "./target/npm_pkg/"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: "./target/npm_pkg/*.tgz"
+      - uses: octokit/request-action@v2.x
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          route: POST /repos/paritytech/npm_publish_automation/actions/workflows/publish.yml/dispatches
+          ref: main
+          inputs: '${{ format(''{{ "repo": "{0}", "run_id": "{1}" }}'', github.repository, github.run_id) }}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NPM_PUBLISH_AUTOMATION_TOKEN }}

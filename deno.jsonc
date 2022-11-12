@@ -26,7 +26,7 @@
   "tasks": {
     "build": "deno run -A _tasks/build.ts",
     "run": "deno task build && deno run -A --no-check=remote",
-    "dnt": "deno task build && deno task run _tasks/build_npm_pkg.ts",
+    "dnt": "deno task build && deno task run _tasks/dnt.ts",
     "test": "deno task build && deno test -A --no-check=remote -L=info",
     "test-update": "deno task build && deno test -A --no-check=remote -L=info -- --update",
     "bench": "deno task build && deno bench -A --no-check=remote --unstable",

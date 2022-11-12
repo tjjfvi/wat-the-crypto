@@ -1,4 +1,3 @@
-// moderate
+// moderate --exclude util.ts
 
 export * from "./hashers/mod.ts"
-export * from "./util.ts"
