@@ -1,0 +1,4 @@
+// moderate --exclude *.wasm.ts
+
+export * from "./blake2b.ts"
+export * from "./xxhash.ts"
