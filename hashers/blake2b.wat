@@ -113,7 +113,7 @@
       (i64.load (i32.const 96))
       (i64.xor (i64.extend_i32_u (local.get $written)))
     )
-    
+
     (i64.store (i32.const 112)
       (i64.load (i32.const 112))
       (i64.xor (local.get $is_last_mask))
