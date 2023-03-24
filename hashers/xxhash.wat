@@ -65,7 +65,7 @@
   )
 
   (func (export "reset") (param $rounds i32) (param $state_adr i32)
-    (memory.copy 
+    (memory.copy
       (local.get $state_adr)
       (i32.const 0) ;; $init_state_adr = 0
       (i32.mul (local.get $rounds) (i32.const 32))
@@ -102,14 +102,14 @@
           (call $i64x2_rotl_31)
           (i64x2.mul (global.get $p11))
         )
-        
+
         (v128.store offset=16 (local.get $state_cur)
           (v128.load offset=16 (local.get $state_cur))
           (i64x2.add (local.get $data23))
           (call $i64x2_rotl_31)
           (i64x2.mul (global.get $p11))
         )
-        
+
         (local.set $state_cur (i32.add (local.get $state_cur) (i32.const 32)))
         (local.tee $round_i (i32.add (local.get $round_i) (i32.const 1)))
         (br_if $rounds (i32.ne (local.get $rounds)))
@@ -123,7 +123,7 @@
   (func $digest_init
     (param $state_adr i32)
     (result i64)
-    
+
     (local $state01 v128)
     (local $state23 v128)
 
@@ -170,7 +170,7 @@
   (func (export "digest")
     (param $rounds i32)
     (param $state_adr i32)
-    (param $written i32) 
+    (param $written i32)
     (param $pos i32)
     (param $end i32)
     (param $digest_adr i32)
@@ -245,7 +245,7 @@
 
         (local.set $pos_cur (local.get $pos_next))
       )
-      
+
       (loop $continue (block $break
         (br_if $break (i32.ge_u (local.get $pos_cur) (local.get $end)))
 
@@ -261,7 +261,7 @@
         (br $continue)
       ))
 
-      (local.get $digest_val) 
+      (local.get $digest_val)
       (i64.xor (local.get $digest_val) (i64.shr_u (i64.const 33)))
       (i64.mul (global.get $p2))
 
@@ -269,7 +269,7 @@
       (i64.xor (i64.shr_u (local.get $digest_val) (i64.const 29)))
       (i64.mul (global.get $p3))
 
-      (local.tee $digest_val) 
+      (local.tee $digest_val)
       (i64.xor (i64.shr_u (local.get $digest_val) (i64.const 32)))
 
       (local.set $digest_val)
