@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
 import { assertSnapshot } from "https://deno.land/std@0.163.0/testing/snapshot.ts"
-import { encodeHex } from "../../util.ts"
-import { Hasher } from "../common.ts"
+import { Hasher } from "./hasher.ts"
+import { encodeHex } from "./hex.ts"
 
 interface TestHasherProps {
   name: string
@@ -13,7 +13,7 @@ const lorem =
   // cspell:disable-next-line
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
-const license = await fetch(new URL("../../LICENSE", import.meta.url)).then((r) => r.arrayBuffer())
+const license = await fetch(new URL("../LICENSE", import.meta.url)).then((r) => r.arrayBuffer())
 
 export const testCases: [name: string, data: Uint8Array][] = [
   ["empty", new Uint8Array()],

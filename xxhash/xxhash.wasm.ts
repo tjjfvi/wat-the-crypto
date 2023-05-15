@@ -1,6 +1,6 @@
 // @generated
 
-import { decodeHex } from "../util.ts"
+import { decodeHex } from "../common/hex.ts"
 
 export default decodeHex(
 "\

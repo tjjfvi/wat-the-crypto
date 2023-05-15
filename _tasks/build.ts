@@ -1,13 +1,13 @@
 import * as flags from "https://deno.land/std@0.163.0/flags/mod.ts"
 import * as path from "https://deno.land/std@0.163.0/path/mod.ts"
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
-import { encodeHex } from "../util.ts"
+import { encodeHex } from "../common/hex.ts"
 
 const { check } = flags.parse(Deno.args, { boolean: ["check"] })
 
 const wasmPaths = [
-  "hashers/xxhash",
-  "hashers/blake2b",
+  "xxhash/xxhash",
+  "blake2b/blake2b",
 ]
 
 let success = true
@@ -36,7 +36,7 @@ async function build(wasmPath: string) {
   const content = `
 // @generated
 
-import { decodeHex } from "${path.relative(path.dirname(wasmPath), "util.ts")}"
+import { decodeHex } from "${path.relative(path.dirname(wasmPath), "common/hex.ts")}"
 
 export default decodeHex(\n"${encodeHex(wasm).replace(/.{0,64}|$/g, "\\\n$&")}",\n)
 `.trimStart()

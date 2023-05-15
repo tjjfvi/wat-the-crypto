@@ -1,6 +1,6 @@
 import * as refImpl from "https://esm.sh/@noble/hashes@1.1.2/blake2b"
-import { Blake2b } from "../blake2b.ts"
-import { testHasher } from "./test_util.ts"
+import { testHasher } from "../common/test_util.ts"
+import { Blake2b } from "./blake2b.ts"
 
 for (const size of [512, 8, 16, 32, 64, 128, 256] as const) {
   testHasher({
