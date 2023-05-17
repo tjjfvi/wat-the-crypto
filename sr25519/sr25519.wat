@@ -44,24 +44,25 @@
     "\08\80\00\80\00\00\00\80"
   )
 
-  ;; 2^255 - 19
-  (global $coef_order i32 (i32.const 192))
-  (data (i32.const 192) "\ed\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\7f")
+  ;; 32 bytes
+  (export "coef" (global $coef))
+  (global $coef i32 (i32.const 192))
 
-  ;; 2^252 + 27742317777372353535851937790883648493
-  (global $exp_order i32 (i32.const 224))
-  (data (i32.const 224) "\ed\d3\f5\5c\1a\63\12\58\d6\9c\f7\a2\de\f9\de\14\00\00\00\00\00\00\00\00\00\00\00\00\00\00\00\10")
+  ;; 32 bytes
+  (export "exp" (global $exp))
+  (global $exp i32 (i32.const 224))
 
-  ;; 2^256 % (2^252 + 27742317777372353535851937790883648493)
-  (global $u256_order_mod_exp_order i32 (i32.const 256))
-  (data (i32.const 256) "\1d\95\98\8d\74\31\ec\d6\70\cf\7d\73\f4\5b\ef\c6\fe\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\ff\0f")
+  ;; 32 bytes
+  ;; exp - (u256 % exp)
+  (export "neg_u256_mod_exp" (global $neg_u256_mod_exp))
+  (global $neg_u256_mod_exp i32 (i32.const 256))
 
   ;; 32 bytes
   (global $u256_mod_tmp i32 (i32.const 288))
 
   ;; 64 bytes
   (global $coef_mul_tmp i32 (i32.const 320))
-  (global $coef_mul_tmp_shr_256 i32 (i32.const 288))
+  (global $coef_mul_tmp_shr_256 i32 (i32.const 352))
 
   ;; 64 bytes
   (global $exp_mul_tmp i32 (i32.const 384))
@@ -70,7 +71,17 @@
   ;; 32 bytes
   (global $_exp_mul_compact_tmp i32 (i32.const 448))
 
-  (global (export "free_adr") i32 (i32.const 480))
+  ;; 32 bytes
+  ;; u256 - coef
+  (export "neg_coef" (global $neg_coef))
+  (global $neg_coef i32 (i32.const 480))
+
+  ;; 32 bytes
+  ;; -exp
+  (export "neg_exp" (global $neg_exp))
+  (global $neg_exp i32 (i32.const 512))
+
+  (global (export "free_adr") i32 (i32.const 544))
 
   (export "keccak_f1600" (func $keccak_f1600))
   (func $keccak_f1600 (param $adr i32)
@@ -406,55 +417,58 @@
     (i32.store16 offset=200 (local.get $strobe) (i32.const 0))
   )
 
-  ;; *o += (s as i32) * (*x)
+  ;; *o += (s as u32) * (*x) + n
   ;; returns overflow
-  (export "u256_add_u32_mul_overflow" (func $u256_add_u32_mul_overflow))
-  (func $u256_add_u32_mul_overflow (param $o i32) (param $s i64) (param $x i32) (result i32)
-    (local $n i64)
+  (export "_u256_add" (func $_u256_add))
+  (func $_u256_add (param $o i32) (param $s i64) (param $x i32) (param $n i64) (result i32)
+    (local $t i64)
+
+    (local.set $t (local.get $s) (i64.shr_s (i64.const 32)) (i64.and (i64.const 0xffff0000)))
 
     (i64.store32 offset=0 (local.get $o) (local.tee $n
-      (i64.load32_u offset=0 (local.get $o))
+      (local.get $n)
+      (i64.add (i64.load32_u offset=0 (local.get $o)))
       (i64.add (i64.mul (local.get $s) (i64.load32_u offset=0 (local.get $x))))
     ))
 
     (i64.store32 offset=4 (local.get $o) (local.tee $n
-      (i64.shr_s (local.get $n) (i64.const 32))
+      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
       (i64.add (i64.load32_u offset=4 (local.get $o)))
       (i64.add (i64.mul (local.get $s) (i64.load32_u offset=4 (local.get $x))))
     ))
 
     (i64.store32 offset=8 (local.get $o) (local.tee $n
-      (i64.shr_s (local.get $n) (i64.const 32))
+      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
       (i64.add (i64.load32_u offset=8 (local.get $o)))
       (i64.add (i64.mul (local.get $s) (i64.load32_u offset=8 (local.get $x))))
     ))
 
     (i64.store32 offset=12 (local.get $o) (local.tee $n
-      (i64.shr_s (local.get $n) (i64.const 32))
+      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
       (i64.add (i64.load32_u offset=12 (local.get $o)))
       (i64.add (i64.mul (local.get $s) (i64.load32_u offset=12 (local.get $x))))
     ))
 
     (i64.store32 offset=16 (local.get $o) (local.tee $n
-      (i64.shr_s (local.get $n) (i64.const 32))
+      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
       (i64.add (i64.load32_u offset=16 (local.get $o)))
       (i64.add (i64.mul (local.get $s) (i64.load32_u offset=16 (local.get $x))))
     ))
 
     (i64.store32 offset=20 (local.get $o) (local.tee $n
-      (i64.shr_s (local.get $n) (i64.const 32))
+      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
       (i64.add (i64.load32_u offset=20 (local.get $o)))
       (i64.add (i64.mul (local.get $s) (i64.load32_u offset=20 (local.get $x))))
     ))
 
     (i64.store32 offset=24 (local.get $o) (local.tee $n
-      (i64.shr_s (local.get $n) (i64.const 32))
+      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
       (i64.add (i64.load32_u offset=24 (local.get $o)))
       (i64.add (i64.mul (local.get $s) (i64.load32_u offset=24 (local.get $x))))
     ))
 
     (i64.store32 offset=28 (local.get $o) (local.tee $n
-      (i64.shr_s (local.get $n) (i64.const 32))
+      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
       (i64.add (i64.load32_u offset=28 (local.get $o)))
       (i64.add (i64.mul (local.get $s) (i64.load32_u offset=28 (local.get $x))))
     ))
@@ -462,10 +476,10 @@
     (i32.wrap_i64 (i64.shr_u (local.get $n) (i64.const 32)))
   )
 
-  ;; *o %= *x
-  (func $u256_mod (param $o i32) (param $x i32)
+  ;; *o %= -(*x)
+  (func $u256_mod_neg (param $o i32) (param $x i32)
     (memory.copy (global.get $u256_mod_tmp) (local.get $o) (i32.const 32))
-    (if (call $u256_add_u32_mul_overflow (global.get $u256_mod_tmp) (i64.const -1) (local.get $x)) (then) (else
+    (if (call $_u256_add (global.get $u256_mod_tmp) (i64.const 1) (local.get $x) (i64.const 0)) (then
       (memory.copy (local.get $o) (global.get $u256_mod_tmp) (i32.const 32))
     ))
     (memory.fill (global.get $u256_mod_tmp) (i32.const 0) (i32.const 32))
@@ -473,58 +487,66 @@
 
   (export "coef_add" (func $coef_add))
   (func $coef_add (param $o i32) (param $x i32)
-    (drop (call $u256_add_u32_mul_overflow (local.get $o) (i64.const 1) (local.get $x)))
-    (call $u256_mod (local.get $o) (global.get $coef_order))
+    (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 0)))
+    (call $u256_mod_neg (local.get $o) (global.get $neg_coef))
   )
 
   (export "exp_add" (func $exp_add))
   (func $exp_add (param $o i32) (param $x i32)
-    (drop (call $u256_add_u32_mul_overflow (local.get $o) (i64.const 1) (local.get $x)))
-    (call $u256_mod (local.get $o) (global.get $exp_order))
+    (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 0)))
+    (call $u256_mod_neg (local.get $o) (global.get $neg_exp))
   )
 
   ;; *o = (*o as u256) + ((*x) * (*y))
   (export "_u256_mul_u512" (func $u256_mul_u512))
   (func $u256_mul_u512 (param $o i32) (param $x i32) (param $y i32)
-    (i32.store offset=32 (local.get $o) (call $u256_add_u32_mul_overflow
+    (i32.store offset=32 (local.get $o) (call $_u256_add
       (local.get $o)
       (i64.load32_u offset=0 (local.get $x))
       (local.get $y)
+      (i64.const 0)
     ))
-    (i32.store offset=36 (local.get $o) (call $u256_add_u32_mul_overflow
+    (i32.store offset=36 (local.get $o) (call $_u256_add
       (i32.add (local.get $o) (i32.const 4))
       (i64.load32_u offset=4 (local.get $x))
       (local.get $y)
+      (i64.const 0)
     ))
-    (i32.store offset=40 (local.get $o) (call $u256_add_u32_mul_overflow
+    (i32.store offset=40 (local.get $o) (call $_u256_add
       (i32.add (local.get $o) (i32.const 8))
       (i64.load32_u offset=8 (local.get $x))
       (local.get $y)
+      (i64.const 0)
     ))
-    (i32.store offset=44 (local.get $o) (call $u256_add_u32_mul_overflow
+    (i32.store offset=44 (local.get $o) (call $_u256_add
       (i32.add (local.get $o) (i32.const 12))
       (i64.load32_u offset=12 (local.get $x))
       (local.get $y)
+      (i64.const 0)
     ))
-    (i32.store offset=48 (local.get $o) (call $u256_add_u32_mul_overflow
+    (i32.store offset=48 (local.get $o) (call $_u256_add
       (i32.add (local.get $o) (i32.const 16))
       (i64.load32_u offset=16 (local.get $x))
       (local.get $y)
+      (i64.const 0)
     ))
-    (i32.store offset=52 (local.get $o) (call $u256_add_u32_mul_overflow
+    (i32.store offset=52 (local.get $o) (call $_u256_add
       (i32.add (local.get $o) (i32.const 20))
       (i64.load32_u offset=20 (local.get $x))
       (local.get $y)
+      (i64.const 0)
     ))
-    (i32.store offset=56 (local.get $o) (call $u256_add_u32_mul_overflow
+    (i32.store offset=56 (local.get $o) (call $_u256_add
       (i32.add (local.get $o) (i32.const 24))
       (i64.load32_u offset=24 (local.get $x))
       (local.get $y)
+      (i64.const 0)
     ))
-    (i32.store offset=60 (local.get $o) (call $u256_add_u32_mul_overflow
+    (i32.store offset=60 (local.get $o) (call $_u256_add
       (i32.add (local.get $o) (i32.const 28))
       (i64.load32_u offset=28 (local.get $x))
       (local.get $y)
+      (i64.const 0)
     ))
   )
 
@@ -533,11 +555,31 @@
   (export "coef_mul" (func $coef_mul))
   (func $coef_mul (param $o i32) (param $x i32) (param $y i32)
     (call $u256_mul_u512 (global.get $coef_mul_tmp) (local.get $x) (local.get $y))
-    (call $u256_mod (global.get $coef_mul_tmp) (global.get $coef_order))
-    (call $u256_mod (global.get $coef_mul_tmp_shr_256) (global.get $coef_order))
-    (drop (call $u256_add_u32_mul_overflow (global.get $coef_mul_tmp) (i64.const 38) (global.get $coef_mul_tmp_shr_256)))
+    (call $u256_mod_neg (global.get $coef_mul_tmp) (global.get $neg_coef))
+    (call $u256_mod_neg (global.get $coef_mul_tmp_shr_256) (global.get $neg_coef))
+    (drop (call $_u256_add (global.get $coef_mul_tmp) (i64.const 0) (global.get $coef_mul_tmp_shr_256)
+      (call $_u256_add (global.get $coef_mul_tmp) (i64.const 38) (global.get $coef_mul_tmp_shr_256) (i64.const 0))
+      (call $u256_mod_neg (global.get $coef_mul_tmp) (global.get $neg_coef))
+      (i64.mul (i64.extend_i32_u) (i64.const 38))
+    ))
+    (call $u256_mod_neg (global.get $coef_mul_tmp) (global.get $neg_coef))
     (memory.copy (local.get $o) (global.get $coef_mul_tmp) (i32.const 32))
     (memory.fill (global.get $coef_mul_tmp) (i32.const 0) (i32.const 64))
+  )
+
+  ;; *o = ~(*x)
+  (func $u256_inv (param $o i32) (param $x i32)
+    (i64.store offset=0 (local.get $o) (i64.xor (i64.load offset=0 (local.get $x)) (i64.const -1)))
+    (i64.store offset=8 (local.get $o) (i64.xor (i64.load offset=8 (local.get $x)) (i64.const -1)))
+    (i64.store offset=16 (local.get $o) (i64.xor (i64.load offset=16 (local.get $x)) (i64.const -1)))
+    (i64.store offset=24 (local.get $o) (i64.xor (i64.load offset=24 (local.get $x)) (i64.const -1)))
+  )
+
+  ;; *o = *x - *y
+  (export "u256_sub" (func $u256_sub))
+  (func $u256_sub (param $o i32) (param $x i32) (param $y i32)
+    (call $u256_inv (local.get $o) (local.get $y))
+    (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 1)))
   )
 
   ;; (func $_exp_mul_compact
@@ -551,7 +593,7 @@
   ;;   (call $u256_mul_u512 (global.get $exp_mul_tmp) (local.get $x) (local.get $y))
   ;;   (call $u256_mod (global.get $exp_mul_tmp) (global.get $exp_order))
   ;;   (call $u256_mod (global.get $exp_mul_tmp_shr_256) (global.get $exp_order))
-  ;;   (call $u256_add_u32_mul_overflow (global.get $coef_mul_tmp) (i64.const 38) (global.get $coef_mul_tmp_shr_256))
+  ;;   (call $_u256_add (global.get $coef_mul_tmp) (i64.const 38) (global.get $coef_mul_tmp_shr_256))
   ;;   (memory.copy (local.get $o) (global.get $coef_mul_tmp) (i32.const 32))
   ;;   (memory.fill (global.get $coef_mul_tmp) (i32.const 0) (i32.const 64))
   ;; )
