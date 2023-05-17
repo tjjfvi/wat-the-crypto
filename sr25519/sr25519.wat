@@ -40,20 +40,26 @@
   (global $exp_mul_tmp i32 (i32.const 384))
   (global $exp_mul_tmp_shr_256 i32 (i32.const 416))
 
-  ;; 32 bytes
+  ;; 64 bytes
   (global $_exp_mul_compact_tmp i32 (i32.const 448))
+  (global $_exp_mul_compact_tmp_shr_256 i32 (i32.const 480))
 
   ;; 32 bytes
   ;; u256 - coef
   (export "neg_coef" (global $neg_coef))
-  (global $neg_coef i32 (i32.const 480))
+  (global $neg_coef i32 (i32.const 512))
 
   ;; 32 bytes
   ;; -exp
   (export "neg_exp" (global $neg_exp))
-  (global $neg_exp i32 (i32.const 512))
+  (global $neg_exp i32 (i32.const 544))
 
-  (global (export "free_adr") i32 (i32.const 544))
+  ;; 32 bytes
+  ;; u256 % exp
+  (export "u256_mod_exp" (global $u256_mod_exp))
+  (global $u256_mod_exp i32 (i32.const 576))
+
+  (global (export "free_adr") i32 (i32.const 608))
 
   (export "keccak_f1600" (func $keccak_f1600))
   (func $keccak_f1600 (param $adr i32)
@@ -449,11 +455,15 @@
   )
 
   ;; *o %= -(*x)
+  (export "u256_mod_neg" (func $u256_mod_neg))
   (func $u256_mod_neg (param $o i32) (param $x i32)
     (memory.copy (global.get $u256_mod_tmp) (local.get $o) (i32.const 32))
-    (if (call $_u256_add (global.get $u256_mod_tmp) (i64.const 1) (local.get $x) (i64.const 0)) (then
-      (memory.copy (local.get $o) (global.get $u256_mod_tmp) (i32.const 32))
-    ))
+    (loop $s
+      (if (call $_u256_add (global.get $u256_mod_tmp) (i64.const 1) (local.get $x) (i64.const 0)) (then
+        (memory.copy (local.get $o) (global.get $u256_mod_tmp) (i32.const 32))
+        (br $s)
+      ))
+    )
     (memory.fill (global.get $u256_mod_tmp) (i32.const 0) (i32.const 32))
   )
 
@@ -554,19 +564,50 @@
     (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 1)))
   )
 
-  ;; (func $_exp_mul_compact
-  ;;   (memory.copy (global.get $_exp_mul_compact_tmp) (global.get $exp_mul_tmp_shr_256) (i32.const 32))
-  ;;   (call $u256_mul_u512 (global.get $exp_mul_tmp) (global.get $_exp_mul_compact_tmp) (global.get $u256_order_mod_exp_order))
-  ;; )
+  (func $_exp_mul_compact
+    (local $n i64)
+    (memory.fill (global.get $_exp_mul_compact_tmp) (i32.const 0) (i32.const 64))
+    (call $u256_mul_u512 (global.get $_exp_mul_compact_tmp) (global.get $exp_mul_tmp_shr_256) (global.get $neg_u256_mod_exp))
+    (call $u256_mod_neg (global.get $_exp_mul_compact_tmp) (global.get $neg_exp))
+    (call $u256_mod_neg (global.get $_exp_mul_compact_tmp_shr_256) (global.get $neg_exp))
+    (call $u256_sub (global.get $_exp_mul_compact_tmp) (global.get $exp) (global.get $_exp_mul_compact_tmp))
+    (call $exp_add (global.get $exp_mul_tmp) (global.get $_exp_mul_compact_tmp))
+    (call $u256_sub (global.get $_exp_mul_compact_tmp_shr_256) (global.get $exp) (global.get $_exp_mul_compact_tmp_shr_256))
+    (memory.fill (global.get $exp_mul_tmp_shr_256) (i32.const 0) (i32.const 32))
+    (call $exp_add (global.get $exp_mul_tmp_shr_256) (global.get $_exp_mul_compact_tmp_shr_256))
+    (call $u256_mod_neg (global.get $exp_mul_tmp_shr_256) (global.get $neg_exp))
+    (call $u256_mod_neg (global.get $exp_mul_tmp) (global.get $neg_exp))
 
-  ;; ;; o: &coef; x: &coef; y: &coef
-  ;; ;; *o = (*x) * (*y)
-  ;; (func $exp_mul (param $o i32) (param $x i32) (param $y i32)
-  ;;   (call $u256_mul_u512 (global.get $exp_mul_tmp) (local.get $x) (local.get $y))
-  ;;   (call $u256_mod (global.get $exp_mul_tmp) (global.get $exp_order))
-  ;;   (call $u256_mod (global.get $exp_mul_tmp_shr_256) (global.get $exp_order))
-  ;;   (call $_u256_add (global.get $coef_mul_tmp) (i64.const 38) (global.get $coef_mul_tmp_shr_256))
-  ;;   (memory.copy (local.get $o) (global.get $coef_mul_tmp) (i32.const 32))
-  ;;   (memory.fill (global.get $coef_mul_tmp) (i32.const 0) (i32.const 64))
-  ;; )
+    (call $log_brk)
+    (local.set $n (i64.extend_i32_u (i64.eq (i64.load8_u offset=63 (global.get $exp_mul_tmp)) (i64.const 16))) (call $dbg_u64))
+    (call $log_u32 (call $_u256_add (global.get $exp_mul_tmp) (local.get $n) (global.get $u256_mod_exp) (i64.const 0)))
+    (call $log_u32 (call $_u256_add (global.get $exp_mul_tmp_shr_256) (i64.const 0) (global.get $u256_mod_exp) (i64.sub (i64.const 0) (local.get $n))))
+    (call $u256_mod_neg (global.get $exp_mul_tmp) (global.get $neg_exp))
+    (call $u256_mod_neg (global.get $exp_mul_tmp_shr_256) (global.get $neg_exp))
+    ;; (memory.fill (global.get $_exp_mul_compact_tmp) (i32.const 0) (i32.const 64))
+  )
+
+  ;; o: &coef; x: &coef; y: &coef
+  ;; *o = (*x) * (*y)
+  (export "exp_mul" (func $exp_mul))
+  (func $exp_mul (param $o i32) (param $x i32) (param $y i32)
+    (call $u256_mul_u512 (global.get $exp_mul_tmp) (local.get $x) (local.get $y))
+    (call $u256_mod_neg (global.get $exp_mul_tmp) (global.get $neg_exp))
+    (call $u256_mod_neg (global.get $exp_mul_tmp_shr_256) (global.get $neg_exp))
+    (call $_exp_mul_compact)
+    (call $_exp_mul_compact)
+    ;; (call $_exp_mul_compact)
+    ;; (call $_exp_mul_compact)
+    ;; (call $_exp_mul_compact)
+    ;; (call $_exp_mul_compact)
+    ;; (call $_exp_mul_compact)
+    ;; (call $_exp_mul_compact)
+    (call $u256_mod_neg (global.get $exp_mul_tmp) (global.get $neg_exp))
+    (call $u256_mod_neg (global.get $exp_mul_tmp) (global.get $neg_exp))
+    (call $u256_mod_neg (global.get $exp_mul_tmp) (global.get $neg_exp))
+    (call $u256_mod_neg (global.get $exp_mul_tmp) (global.get $neg_exp))
+    (call $u256_mod_neg (global.get $exp_mul_tmp) (global.get $neg_exp))
+    (memory.copy (local.get $o) (global.get $exp_mul_tmp) (i32.const 32))
+    ;; (memory.fill (global.get $exp_mul_tmp) (i32.const 0) (i32.const 64))
+  )
 )
