@@ -21,7 +21,6 @@ interface Sr25519Wasm {
   keccak_rc_adr: WebAssembly.Global
   coef: WebAssembly.Global
   exp: WebAssembly.Global
-  neg_u256_mod_exp: WebAssembly.Global
   neg_coef: WebAssembly.Global
   neg_exp: WebAssembly.Global
   u256_mod_exp: WebAssembly.Global
@@ -76,7 +75,6 @@ mem.set(
 
 writeU256(wasm.coef.value, coef)
 writeU256(wasm.exp.value, exp)
-writeU256(wasm.neg_u256_mod_exp.value, exp - (u256 % exp))
 writeU256(wasm.neg_coef.value, u256 - coef)
 writeU256(wasm.neg_exp.value, u256 - exp)
 writeU256(wasm.u256_mod_exp.value, u256 % exp)

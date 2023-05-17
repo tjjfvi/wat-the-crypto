@@ -25,39 +25,32 @@
   (global $exp i32 (i32.const 224))
 
   ;; 32 bytes
-  ;; exp - (u256 % exp)
-  (export "neg_u256_mod_exp" (global $neg_u256_mod_exp))
-  (global $neg_u256_mod_exp i32 (i32.const 256))
-
-  ;; 32 bytes
-  (global $u256_mod_tmp i32 (i32.const 288))
-
-  ;; 64 bytes
-  (global $coef_mul_tmp i32 (i32.const 320))
-  (global $coef_mul_tmp_shr_256 i32 (i32.const 352))
-
-  ;; 64 bytes
-  (global $exp_mul_tmp i32 (i32.const 384))
-  (global $exp_mul_tmp_shr_256 i32 (i32.const 416))
-
-  ;; 64 empty bytes
-
-  ;; 32 bytes
   ;; u256 - coef
   (export "neg_coef" (global $neg_coef))
-  (global $neg_coef i32 (i32.const 512))
+  (global $neg_coef i32 (i32.const 256))
 
   ;; 32 bytes
   ;; -exp
   (export "neg_exp" (global $neg_exp))
-  (global $neg_exp i32 (i32.const 544))
+  (global $neg_exp i32 (i32.const 288))
 
   ;; 32 bytes
   ;; u256 % exp
   (export "u256_mod_exp" (global $u256_mod_exp))
-  (global $u256_mod_exp i32 (i32.const 576))
+  (global $u256_mod_exp i32 (i32.const 320))
 
-  (global (export "free_adr") i32 (i32.const 608))
+  ;; 32 bytes
+  (global $u256_mod_tmp i32 (i32.const 352))
+
+  ;; 64 bytes
+  (global $coef_mul_tmp i32 (i32.const 384))
+  (global $coef_mul_tmp_shr_256 i32 (i32.const 416))
+
+  ;; 64 bytes
+  (global $exp_mul_tmp i32 (i32.const 448))
+  (global $exp_mul_tmp_shr_256 i32 (i32.const 480))
+
+  (global (export "free_adr") i32 (i32.const 512))
 
   (export "keccak_f1600" (func $keccak_f1600))
   (func $keccak_f1600 (param $adr i32)
