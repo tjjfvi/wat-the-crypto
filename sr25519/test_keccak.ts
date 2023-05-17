@@ -3,7 +3,7 @@ import { memBuf, wasm } from "./sr25519.ts"
 
 const state = new BigUint64Array(memBuf.buffer, 0, 25)
 
-wasm.keccak_f1600(0)
+wasm.keccak_f1600(wasm.free_adr.value)
 
 assertEquals(
   state,
