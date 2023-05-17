@@ -1,5 +1,4 @@
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
-import buffer from "https://deno.land/std@0.177.0/node/internal_binding/buffer.ts"
 import { coef, exp, mem, readU256, u256, u512, wasm, writeU256 } from "./sr25519.ts"
 
 const u256s = [
