@@ -83,10 +83,10 @@ writeU256(wasm.neg_exp.value, u256 - exp)
 writeU256(wasm.u256_mod_exp.value, u256 % exp)
 writeU256(wasm.coef_neg_two.value, coef - 2n)
 
-writeU256(wasm.free_adr.value, 121666n)
-wasm.coef_inv(wasm.rist_d.value, wasm.free_adr.value)
-writeU256(wasm.free_adr.value, u256 - 121665n)
-wasm.coef_mul(wasm.rist_d.value, wasm.free_adr.value)
+// writeU256(wasm.free_adr.value, 121666n)
+// wasm.coef_inv(wasm.rist_d.value, wasm.free_adr.value)
+// writeU256(wasm.free_adr.value, u256 - 121665n)
+// wasm.coef_mul(wasm.rist_d.value, wasm.free_adr.value)
 
 export function readU256(adr: number) {
   return $u256.decode(mem.subarray(adr, adr + 32))

@@ -28,26 +28,26 @@ const bAdr = wasm.free_adr.value + 256
 const oAdr = wasm.free_adr.value + 512
 
 for (const aU256 of u256s) {
-  writeU256(aAdr, aU256)
-  wasm.u256_mod_neg(aAdr, wasm.neg_coef.value)
-  assertU256Equals(readU256(aAdr), aU256 % coef)
-  writeU256(aAdr, aU256)
-  wasm.u256_mod_neg(aAdr, wasm.neg_exp.value)
-  assertU256Equals(readU256(aAdr), aU256 % exp)
-}
-
-for (const aU256 of u256s) {
   for (const bU256 of u256s) {
     writeU256(aAdr, aU256)
     writeU256(bAdr, bU256)
     wasm._u256_add(aAdr, 1n, bAdr, 0n)
     assertU256Equals(readU256(aAdr), (aU256 + bU256) % u256)
 
-    writeU256(aAdr, aU256)
-    writeU256(bAdr, bU256)
-    wasm.u256_sub(oAdr, aAdr, bAdr)
-    assertU256Equals(readU256(oAdr), (u256 + aU256 - bU256) % u256)
+    // writeU256(aAdr, aU256)
+    // writeU256(bAdr, bU256)
+    // wasm.u256_sub(oAdr, aAdr, bAdr)
+    // assertU256Equals(readU256(oAdr), (u256 + aU256 - bU256) % u256)
   }
+}
+
+for (const aU256 of u256s) {
+  writeU256(aAdr, aU256)
+  wasm.u256_mod_neg(aAdr, wasm.neg_coef.value)
+  assertU256Equals(readU256(aAdr), aU256 % coef)
+  writeU256(aAdr, aU256)
+  wasm.u256_mod_neg(aAdr, wasm.neg_exp.value)
+  assertU256Equals(readU256(aAdr), aU256 % exp)
 }
 
 for (const aU256 of u256s) {

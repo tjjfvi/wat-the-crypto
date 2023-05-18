@@ -321,63 +321,38 @@
     (i32.store16 offset=200 (local.get $strobe) (i32.const 0))
   )
 
+  (func $_u256_add_0
+    (param $o i32) (param $s i64) (param $x i32) (param $n i64)
+    (result i32) (result i64) (result i32) (result i64)
+
+    (i32.add (local.get $o) (i32.const 4))
+    (local.get $s)
+    (i32.add (local.get $x) (i32.const 4))
+    (i64.store32 (local.get $o) (local.tee $n
+      (local.get $n)
+      (i64.add (i64.load32_u (local.get $o)))
+      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=0 (local.get $x))))
+    ))
+    (i64.shr_u (local.get $n) (i64.const 32))
+  )
+
   ;; *o += (s as u32) * (*x) + n
   ;; returns overflow
   (export "_u256_add" (func $_u256_add))
   (func $_u256_add (param $o i32) (param $s i64) (param $x i32) (param $n i64) (result i32)
-    (local $t i64)
 
-    (local.set $t (local.get $s) (i64.shr_s (i64.const 32)) (i64.and (i64.const 0xffff0000)))
+    (local.get $o) (local.get $s) (local.get $x) (local.get $n)
+    (call $_u256_add_0)
+    (call $_u256_add_0)
+    (call $_u256_add_0)
+    (call $_u256_add_0)
+    (call $_u256_add_0)
+    (call $_u256_add_0)
+    (call $_u256_add_0)
+    (call $_u256_add_0)
+    (local.set $n) (drop) (drop) (drop)
 
-    (i64.store32 offset=0 (local.get $o) (local.tee $n
-      (local.get $n)
-      (i64.add (i64.load32_u offset=0 (local.get $o)))
-      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=0 (local.get $x))))
-    ))
-
-    (i64.store32 offset=4 (local.get $o) (local.tee $n
-      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
-      (i64.add (i64.load32_u offset=4 (local.get $o)))
-      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=4 (local.get $x))))
-    ))
-
-    (i64.store32 offset=8 (local.get $o) (local.tee $n
-      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
-      (i64.add (i64.load32_u offset=8 (local.get $o)))
-      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=8 (local.get $x))))
-    ))
-
-    (i64.store32 offset=12 (local.get $o) (local.tee $n
-      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
-      (i64.add (i64.load32_u offset=12 (local.get $o)))
-      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=12 (local.get $x))))
-    ))
-
-    (i64.store32 offset=16 (local.get $o) (local.tee $n
-      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
-      (i64.add (i64.load32_u offset=16 (local.get $o)))
-      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=16 (local.get $x))))
-    ))
-
-    (i64.store32 offset=20 (local.get $o) (local.tee $n
-      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
-      (i64.add (i64.load32_u offset=20 (local.get $o)))
-      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=20 (local.get $x))))
-    ))
-
-    (i64.store32 offset=24 (local.get $o) (local.tee $n
-      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
-      (i64.add (i64.load32_u offset=24 (local.get $o)))
-      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=24 (local.get $x))))
-    ))
-
-    (i64.store32 offset=28 (local.get $o) (local.tee $n
-      (i64.or (local.get $t) (i64.shr_u (local.get $n) (i64.const 32)))
-      (i64.add (i64.load32_u offset=28 (local.get $o)))
-      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=28 (local.get $x))))
-    ))
-
-    (i32.wrap_i64 (i64.shr_u (local.get $n) (i64.const 32)))
+    (i32.wrap_i64 (local.get $n))
   )
 
   ;; *o %= -(*x)
