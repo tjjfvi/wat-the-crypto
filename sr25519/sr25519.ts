@@ -8,6 +8,8 @@ export const u512 = 1n << 512n
 export const u256 = 1n << 256n
 export const coef = (1n << 255n) - 19n
 export const exp = (1n << 252n) + 27742317777372353535851937790883648493n
+export const coefI = 19681161376707505956807079304988542015446066515923890162744021073123829784752n
+const ristD = 37095705934669439343138083508754565189542113879843219016388785533085940283555n
 
 const memory = new WebAssembly.Memory({ initial: 10, maximum: 128 })
 
@@ -26,6 +28,10 @@ interface Sr25519Wasm {
   u256_mod_exp: WebAssembly.Global
   coef_neg_two: WebAssembly.Global
   rist_d: WebAssembly.Global
+  coef_invsqrt_pow: WebAssembly.Global
+  coef_i: WebAssembly.Global
+  coef_neg_i: WebAssembly.Global
+  coef_neg_one: WebAssembly.Global
   free_adr: WebAssembly.Global
 
   keccak_f1600(adr: number): void
@@ -39,6 +45,9 @@ interface Sr25519Wasm {
   exp_add(o: number, x: number): void
   exp_mul(x: number, y: number): void
   coef_inv(o: number, x: number): void
+  coef_invsqrt(o: number): number
+
+  rist_decode(o: number, s: number): number
 }
 
 export const wasm = wasmInstance.exports as never as Sr25519Wasm
@@ -82,11 +91,11 @@ writeU256(wasm.neg_coef.value, u256 - coef)
 writeU256(wasm.neg_exp.value, u256 - exp)
 writeU256(wasm.u256_mod_exp.value, u256 % exp)
 writeU256(wasm.coef_neg_two.value, coef - 2n)
-
-// writeU256(wasm.free_adr.value, 121666n)
-// wasm.coef_inv(wasm.rist_d.value, wasm.free_adr.value)
-// writeU256(wasm.free_adr.value, u256 - 121665n)
-// wasm.coef_mul(wasm.rist_d.value, wasm.free_adr.value)
+writeU256(wasm.coef_invsqrt_pow.value, 3n + 7n * (coef - 5n) / 8n)
+writeU256(wasm.coef_i.value, coefI)
+writeU256(wasm.coef_neg_i.value, coef - coefI)
+writeU256(wasm.coef_neg_one.value, coef - 1n)
+writeU256(wasm.rist_d.value, ristD)
 
 export function readU256(adr: number) {
   return $u256.decode(mem.subarray(adr, adr + 32))

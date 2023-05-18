@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
-import { coef, exp, mem, readU256, u256, u512, wasm, writeU256 } from "./sr25519.ts"
+import { coef, coefI, exp, mem, readU256, u256, u512, wasm, writeU256 } from "./sr25519.ts"
 
 const u256s = [
   0n,
@@ -34,10 +34,10 @@ for (const aU256 of u256s) {
     wasm._u256_add(aAdr, 1n, bAdr, 0n)
     assertU256Equals(readU256(aAdr), (aU256 + bU256) % u256)
 
-    // writeU256(aAdr, aU256)
-    // writeU256(bAdr, bU256)
-    // wasm.u256_sub(oAdr, aAdr, bAdr)
-    // assertU256Equals(readU256(oAdr), (u256 + aU256 - bU256) % u256)
+    writeU256(aAdr, aU256)
+    writeU256(bAdr, bU256)
+    wasm.u256_sub(oAdr, aAdr, bAdr)
+    assertU256Equals(readU256(oAdr), (u256 + aU256 - bU256) % u256)
   }
 }
 
@@ -101,6 +101,16 @@ for (const aU256 of u256s) {
   writeU256(aAdr, aU256 % coef)
   wasm.coef_inv(oAdr, aAdr)
   assertU256Equals(readU256(oAdr) * aU256 % coef, 1n)
+}
+
+for (const aU256 of u256s) {
+  if ((aU256 % coef) === 0n) continue
+  writeU256(aAdr, aU256 % coef)
+  if (wasm.coef_invsqrt(aAdr)) {
+    assertU256Equals(readU256(aAdr) ** 2n * aU256 % coef, 1n)
+  } else {
+    assertU256Equals(readU256(aAdr) ** 2n * aU256 % coef, coefI)
+  }
 }
 
 function readU512(adr: number) {
