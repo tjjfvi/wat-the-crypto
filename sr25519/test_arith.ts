@@ -88,14 +88,19 @@ for (const aU256 of u256s) {
 }
 
 for (const aU256 of u256s) {
-  for (
-    const bU256 of u256s
-  ) {
+  for (const bU256 of u256s) {
     writeU256(aAdr, aU256)
     writeU256(bAdr, bU256)
     wasm.exp_mul(oAdr, aAdr, bAdr)
     assertU256Equals(readU256(oAdr), (aU256 * bU256) % exp)
   }
+}
+
+for (const aU256 of u256s) {
+  if ((aU256 % coef) === 0n) continue
+  writeU256(aAdr, aU256 % coef)
+  wasm.coef_inv(oAdr, aAdr)
+  assertU256Equals(readU256(oAdr) * aU256 % coef, 1n)
 }
 
 function readU512(adr: number) {

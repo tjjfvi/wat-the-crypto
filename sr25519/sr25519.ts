@@ -24,6 +24,7 @@ interface Sr25519Wasm {
   neg_coef: WebAssembly.Global
   neg_exp: WebAssembly.Global
   u256_mod_exp: WebAssembly.Global
+  coef_neg_two: WebAssembly.Global
   free_adr: WebAssembly.Global
 
   keccak_f1600(adr: number): void
@@ -36,6 +37,7 @@ interface Sr25519Wasm {
   coef_mul(o: number, x: number, y: number): void
   exp_add(o: number, x: number): void
   exp_mul(o: number, x: number, y: number): void
+  coef_inv(o: number, x: number): void
 }
 
 export const wasm = wasmInstance.exports as never as Sr25519Wasm
@@ -78,6 +80,7 @@ writeU256(wasm.exp.value, exp)
 writeU256(wasm.neg_coef.value, u256 - coef)
 writeU256(wasm.neg_exp.value, u256 - exp)
 writeU256(wasm.u256_mod_exp.value, u256 % exp)
+writeU256(wasm.coef_neg_two.value, coef - 2n)
 
 export function readU256(adr: number) {
   return $u256.decode(mem.subarray(adr, adr + 32))

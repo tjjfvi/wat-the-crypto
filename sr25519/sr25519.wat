@@ -40,17 +40,30 @@
   (global $u256_mod_exp i32 (i32.const 320))
 
   ;; 32 bytes
-  (global $u256_mod_tmp i32 (i32.const 352))
+  ;; coef - 2
+  (export "coef_neg_two" (global $coef_neg_two))
+  (global $coef_neg_two i32 (i32.const 352))
+
+  ;; 32 bytes
+  ;; 1
+  (global $one i32 (i32.const 384))
+  (data (i32.const 384) "\01")
+
+  ;; 32 bytes
+  (global $u256_mod_tmp i32 (i32.const 416))
 
   ;; 64 bytes
-  (global $coef_mul_tmp i32 (i32.const 384))
-  (global $coef_mul_tmp_shr_256 i32 (i32.const 416))
+  (global $coef_mul_tmp i32 (i32.const 448))
+  (global $coef_mul_tmp_shr_256 i32 (i32.const 480))
 
   ;; 64 bytes
-  (global $exp_mul_tmp i32 (i32.const 448))
-  (global $exp_mul_tmp_shr_256 i32 (i32.const 480))
+  (global $exp_mul_tmp i32 (i32.const 512))
+  (global $exp_mul_tmp_shr_256 i32 (i32.const 544))
 
-  (global (export "free_adr") i32 (i32.const 512))
+  ;; 32 bytes
+  (global $coef_mul_eq_tmp i32 (i32.const 576))
+
+  (global (export "free_adr") i32 (i32.const 608))
 
   (export "keccak_f1600" (func $keccak_f1600))
   (func $keccak_f1600 (param $adr i32)
@@ -577,5 +590,52 @@
     )
     (memory.copy (local.get $o) (global.get $exp_mul_tmp) (i32.const 32))
     (memory.fill (global.get $exp_mul_tmp) (i32.const 0) (i32.const 64))
+  )
+
+  (table $fns 1024 funcref)
+  (elem (i32.const 100)
+    $coef_mul_eq
+  )
+
+  (func $coef_mul_eq (type $mul_fn) (param $x i32) (param $y i32)
+    (call $coef_mul (local.get $x) (local.get $x) (local.get $y))
+  )
+
+  ;; <T> x: &T, y: &T
+  ;; *x *= *y
+  (type $mul_fn (func (param i32) (param i32)))
+
+  ;; <T> o: &T; x: &T; e: u32; f: &mul_fn<T>
+  ;; *o = *o^u32 * (*x)^e
+  (func $pow_u32 (param $o i32) (param $x i32) (param $e i32) (param $f i32)
+    (local $m i32)
+    (local.set $m (i32.const 0x80000000))
+    (loop $m
+      (call_indirect $fns (type $mul_fn) (local.get $o) (local.get $o) (local.get $f))
+      (if (i32.and (local.get $e) (local.get $m)) (then
+        (call_indirect $fns (type $mul_fn) (local.get $o) (local.get $x) (local.get $f))
+      ))
+      (br_if $m (local.tee $m (i32.shr_u (local.get $m) (i32.const 1))))
+    )
+  )
+
+  ;; <T> o: &T; x: &T; e: &u256; f: &mul_fn<T>
+  ;; *o = *o^(u256) * (*x)^(*e)
+  (func $pow (param $o i32) (param $x i32) (param $e i32) (param $f i32)
+    (local $m i32)
+    (local.set $m (i32.add (local.get $e) (i32.const 28)))
+    (loop $m
+      (call $pow_u32 (local.get $o) (local.get $x) (i32.load (local.get $m)) (local.get $f))
+      (local.tee $m (i32.sub (local.get $m) (i32.const 4)))
+      (br_if $m (i32.ge_u (local.get $e)))
+    )
+  )
+
+  ;; o: &coef; x: &coef
+  ;; *o = 1 / (*x)
+  (export "coef_inv" (func $coef_inv))
+  (func $coef_inv (param $o i32) (param $x i32)
+    (memory.copy (local.get $o) (global.get $one) (i32.const 32))
+    (call $pow (local.get $o) (local.get $x) (global.get $coef_neg_two) (i32.const 100))
   )
 )
