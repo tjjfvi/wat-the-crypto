@@ -32,6 +32,7 @@ interface Sr25519Wasm {
   coef_i: WebAssembly.Global
   coef_neg_i: WebAssembly.Global
   coef_neg_one: WebAssembly.Global
+  rist_inv_root_a_sub_d: WebAssembly.Global
   free_adr: WebAssembly.Global
 
   keccak_f1600(adr: number): void
@@ -48,6 +49,7 @@ interface Sr25519Wasm {
   coef_invsqrt(o: number): number
 
   rist_decode(o: number, s: number): number
+  rist_encode(o: number, x: number): number
 }
 
 export const wasm = wasmInstance.exports as never as Sr25519Wasm
@@ -95,6 +97,10 @@ writeU256(wasm.coef_invsqrt_pow.value, 3n + 7n * (coef - 5n) / 8n)
 writeU256(wasm.coef_i.value, coefI)
 writeU256(wasm.coef_neg_i.value, coef - coefI)
 writeU256(wasm.coef_neg_one.value, coef - 1n)
+writeU256(
+  wasm.rist_inv_root_a_sub_d.value,
+  54469307008909316920995813868745141605393597292927456921205312896311721017578n,
+)
 writeU256(wasm.rist_d.value, ristD)
 
 export function readU256(adr: number) {

@@ -1,8 +1,8 @@
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
-import { decodeHex } from "../common/hex.ts"
+import { decodeHex, encodeHex } from "../common/hex.ts"
 import { mem, wasm } from "./sr25519.ts"
 
-const cases = [
+const cases: [string, number?][] = [
   ["0000000000000000000000000000000000000000000000000000000000000000", 0],
   ["e2f2ae0a6abc4e71a884a961c500515f58e30b6aa582dd8db6a65945e08d2d76", 0],
   ["6a493210f7499cd17fecb510ae0cea23a110e8d5b901f8acadd3095c73a3b919", 0],
@@ -53,10 +53,23 @@ const cases = [
   ["445425117cb8c90edcbc7c1cc0e74f747f2c1efa5630a967c64f287792a48a4b", 5],
 
   ["ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f", 5],
-] as const
+]
+
+for (let i = 0; i < 2048; i++) {
+  wasm.keccak_f1600(wasm.free_adr.value)
+  wasm.keccak_f1600(wasm.free_adr.value + 56)
+  cases.push([encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32))])
+}
 
 for (const [hex, out] of cases) {
   mem.set(decodeHex(hex), wasm.free_adr.value)
   const r = wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
-  assertEquals(r, out)
+  if (out) {
+    assertEquals(r, out)
+  }
+  if (r === 0) {
+    mem.set(new Uint8Array(32), wasm.free_adr.value)
+    wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
+    assertEquals(encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)), hex)
+  }
 }
