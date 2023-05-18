@@ -73,3 +73,54 @@ for (const [hex, out] of cases) {
     assertEquals(encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)), hex)
   }
 }
+
+const doublings = [
+  [cases[0]![0], cases[0]![0]],
+  [cases[1]![0], cases[2]![0]],
+  [cases[2]![0], cases[4]![0]],
+  [cases[3]![0], cases[6]![0]],
+  [cases[4]![0], cases[8]![0]],
+] as const
+
+for (const [a, b] of doublings) {
+  mem.set(
+    decodeHex(a),
+    wasm.free_adr.value,
+  )
+  wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
+  wasm.curve_double(wasm.free_adr.value + 32)
+  wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
+  assertEquals(
+    encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)),
+    b,
+  )
+}
+
+const adds = [
+  [cases[0]![0], cases[0]![0], cases[0]![0]],
+  [cases[0]![0], cases[1]![0], cases[1]![0]],
+  [cases[1]![0], cases[0]![0], cases[1]![0]],
+  [cases[1]![0], cases[1]![0], cases[2]![0]],
+  [cases[1]![0], cases[2]![0], cases[3]![0]],
+  [cases[2]![0], cases[1]![0], cases[3]![0]],
+  [cases[3]![0], cases[4]![0], cases[7]![0]],
+] as const
+
+for (const [a, b, c] of adds) {
+  mem.set(
+    decodeHex(a),
+    wasm.free_adr.value,
+  )
+  mem.set(
+    decodeHex(b),
+    wasm.free_adr.value + 32 * 5,
+  )
+  wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
+  wasm.rist_decode(wasm.free_adr.value + 32 * 6, wasm.free_adr.value + 32 * 5)
+  wasm.curve_add(wasm.free_adr.value + 32, wasm.free_adr.value + 32 * 6)
+  wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
+  assertEquals(
+    encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)),
+    c,
+  )
+}

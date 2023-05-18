@@ -110,7 +110,33 @@
   (export "rist_inv_root_a_sub_d" (global $rist_inv_root_a_sub_d))
   (global $rist_inv_root_a_sub_d i32 (i32.const 1120))
 
-  (global (export "free_adr") i32 (i32.const 1152))
+  ;; 32 bytes
+  ;; 486662
+  (export "curve_a" (global $curve_a))
+  (global $curve_a i32 (i32.const 1152))
+
+  (global $curve_double_tmp_x_2 i32 (i32.const 1184))
+  (global $curve_double_tmp_y_2 i32 (i32.const 1216))
+  (global $curve_double_tmp_2z_2 i32 (i32.const 1248))
+  (global $curve_double_tmp_x_y_2 i32 (i32.const 1280))
+
+  (global $curve_tmp_cx i32 (i32.const 1312))
+  (global $curve_tmp_cy i32 (i32.const 1344))
+  (global $curve_tmp_cz i32 (i32.const 1376))
+  (global $curve_tmp_ct i32 (i32.const 1408))
+
+  (global $curve_add_tmp_pp i32 (i32.const 1440))
+  (global $curve_add_tmp_mm i32 (i32.const 1472))
+  (global $curve_add_tmp_zz2 i32 (i32.const 1504))
+  (global $curve_add_tmp_tt2d i32 (i32.const 1536))
+  (global $curve_add_tmp i32 (i32.const 1568))
+
+  ;; 32 bytes
+  ;; 2 * -121665/121666
+  (export "rist_2d" (global $rist_2d))
+  (global $rist_2d i32 (i32.const 1600))
+
+  (global (export "free_adr") i32 (i32.const 1632))
 
   (func $_keccak_0 (param $adr i32) (result i32) (result i64)
     (i32.add (local.get $adr) (i32.const 8))
@@ -760,4 +786,105 @@
 
     (memory.copy (local.get $o) (global.get $rist_code_tmp_dy) (i32.const 32))
   )
-)
+
+  (export "curve_double" (func $curve_double))
+  (func $curve_double (param $x i32)
+    (local $y i32) (local $z i32) (local $t i32)
+
+    (local.set $y (i32.add (local.get $x) (i32.const 32)))
+    (local.set $z (i32.add (local.get $x) (i32.const 64)))
+    (local.set $t (i32.add (local.get $x) (i32.const 96)))
+
+    (memory.copy (global.get $curve_double_tmp_x_2) (local.get $x) (i32.const 96))
+    (call $coef_sqr (global.get $curve_double_tmp_x_2))
+    (call $coef_sqr (global.get $curve_double_tmp_y_2))
+    (call $coef_sqr (global.get $curve_double_tmp_2z_2))
+    (call $coef_mul (global.get $curve_double_tmp_2z_2) (global.get $two))
+
+    (memory.copy (global.get $curve_double_tmp_x_y_2) (local.get $x) (i32.const 32))
+    (call $coef_add (global.get $curve_double_tmp_x_y_2) (local.get $y))
+    (call $coef_sqr (global.get $curve_double_tmp_x_y_2))
+
+    (memory.copy (global.get $curve_tmp_cy) (global.get $curve_double_tmp_x_2) (i32.const 32))
+    (call $coef_add (global.get $curve_tmp_cy) (global.get $curve_double_tmp_y_2))
+
+    (memory.copy (global.get $curve_tmp_cz) (global.get $curve_double_tmp_x_2) (i32.const 32))
+    (call $u256_sub (global.get $curve_tmp_cz) (global.get $coef) (global.get $curve_tmp_cz))
+    (call $coef_add (global.get $curve_tmp_cz) (global.get $curve_double_tmp_y_2))
+
+    (memory.copy (global.get $curve_tmp_cx) (global.get $curve_tmp_cy) (i32.const 32))
+    (call $u256_sub (global.get $curve_tmp_cx) (global.get $coef) (global.get $curve_tmp_cx))
+    (call $coef_add (global.get $curve_tmp_cx) (global.get $curve_double_tmp_x_y_2))
+
+    (memory.copy (global.get $curve_tmp_ct) (global.get $curve_tmp_cz) (i32.const 32))
+    (call $u256_sub (global.get $curve_tmp_ct) (global.get $coef) (global.get $curve_tmp_ct))
+    (call $coef_add (global.get $curve_tmp_ct) (global.get $curve_double_tmp_2z_2))
+
+    (memory.copy (local.get $x) (global.get $curve_tmp_cx) (i32.const 96))
+    (memory.copy (local.get $t) (global.get $curve_tmp_cx) (i32.const 32))
+    (call $coef_mul (local.get $x) (global.get $curve_tmp_ct))
+    (call $coef_mul (local.get $y) (global.get $curve_tmp_cz))
+    (call $coef_mul (local.get $z) (global.get $curve_tmp_ct))
+    (call $coef_mul (local.get $t) (global.get $curve_tmp_cy))
+  )
+
+    ;; <-- form.wat bug?
+
+    (export "curve_add" (func $curve_add))
+    (func $curve_add (param $ax i32) (param $bx i32)
+      (local $ay i32) (local $az i32) (local $at i32)
+      (local $by i32) (local $bz i32) (local $bt i32)
+
+      (local.set $ay (i32.add (local.get $ax) (i32.const 32)))
+      (local.set $az (i32.add (local.get $ax) (i32.const 64)))
+      (local.set $at (i32.add (local.get $ax) (i32.const 96)))
+
+      (local.set $by (i32.add (local.get $bx) (i32.const 32)))
+      (local.set $bz (i32.add (local.get $bx) (i32.const 64)))
+      (local.set $bt (i32.add (local.get $bx) (i32.const 96)))
+
+      (memory.copy (global.get $curve_add_tmp_pp) (local.get $ax) (i32.const 32))
+      (call $coef_add (global.get $curve_add_tmp_pp) (local.get $ay))
+      (memory.copy (global.get $curve_add_tmp) (local.get $bx) (i32.const 32))
+      (call $coef_add (global.get $curve_add_tmp) (local.get $by))
+      (call $coef_mul (global.get $curve_add_tmp_pp) (global.get $curve_add_tmp))
+
+      (memory.copy (global.get $curve_add_tmp_mm) (local.get $ax) (i32.const 32))
+      (call $u256_sub (global.get $curve_add_tmp_mm) (global.get $coef) (global.get $curve_add_tmp_mm))
+      (call $coef_add (global.get $curve_add_tmp_mm) (local.get $ay))
+      (memory.copy (global.get $curve_add_tmp) (local.get $bx) (i32.const 32))
+      (call $u256_sub (global.get $curve_add_tmp) (global.get $coef) (global.get $curve_add_tmp))
+      (call $coef_add (global.get $curve_add_tmp) (local.get $by))
+      (call $coef_mul (global.get $curve_add_tmp_mm) (global.get $curve_add_tmp))
+
+      (memory.copy (global.get $curve_add_tmp_tt2d) (local.get $at) (i32.const 32))
+      (call $coef_mul (global.get $curve_add_tmp_tt2d) (local.get $bt))
+      (call $coef_mul (global.get $curve_add_tmp_tt2d) (global.get $rist_2d))
+
+      (memory.copy (global.get $curve_add_tmp_zz2) (local.get $az) (i32.const 32))
+      (call $coef_mul (global.get $curve_add_tmp_zz2) (local.get $bz))
+      (call $coef_add (global.get $curve_add_tmp_zz2) (global.get $curve_add_tmp_zz2))
+
+      (memory.copy (global.get $curve_tmp_cx) (global.get $curve_add_tmp_mm) (i32.const 32))
+      (call $u256_sub (global.get $curve_tmp_cx) (global.get $coef) (global.get $curve_tmp_cx))
+      (call $coef_add (global.get $curve_tmp_cx) (global.get $curve_add_tmp_pp))
+
+      (memory.copy (global.get $curve_tmp_cy) (global.get $curve_add_tmp_mm) (i32.const 32))
+      (call $coef_add (global.get $curve_tmp_cy) (global.get $curve_add_tmp_pp))
+
+      (memory.copy (global.get $curve_tmp_cz) (global.get $curve_add_tmp_tt2d) (i32.const 32))
+      (call $coef_add (global.get $curve_tmp_cz) (global.get $curve_add_tmp_zz2))
+
+      (memory.copy (global.get $curve_tmp_ct) (global.get $curve_add_tmp_tt2d) (i32.const 32))
+      (call $u256_sub (global.get $curve_tmp_ct) (global.get $coef) (global.get $curve_tmp_ct))
+      (call $coef_add (global.get $curve_tmp_ct) (global.get $curve_add_tmp_zz2))
+
+      (memory.copy (local.get $ax) (global.get $curve_tmp_cx) (i32.const 96))
+      (memory.copy (local.get $at) (global.get $curve_tmp_cx) (i32.const 32))
+      (call $coef_mul (local.get $ax) (global.get $curve_tmp_ct))
+      (call $coef_mul (local.get $ay) (global.get $curve_tmp_cz))
+      (call $coef_mul (local.get $az) (global.get $curve_tmp_ct))
+      (call $coef_mul (local.get $at) (global.get $curve_tmp_cy))
+    )
+  )
+  

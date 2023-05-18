@@ -33,6 +33,8 @@ interface Sr25519Wasm {
   coef_neg_i: WebAssembly.Global
   coef_neg_one: WebAssembly.Global
   rist_inv_root_a_sub_d: WebAssembly.Global
+  curve_a: WebAssembly.Global
+  rist_2d: WebAssembly.Global
   free_adr: WebAssembly.Global
 
   keccak_f1600(adr: number): void
@@ -50,6 +52,9 @@ interface Sr25519Wasm {
 
   rist_decode(o: number, s: number): number
   rist_encode(o: number, x: number): number
+
+  curve_double(x: number): void
+  curve_add(x: number, y: number): void
 }
 
 export const wasm = wasmInstance.exports as never as Sr25519Wasm
@@ -102,6 +107,8 @@ writeU256(
   54469307008909316920995813868745141605393597292927456921205312896311721017578n,
 )
 writeU256(wasm.rist_d.value, ristD)
+writeU256(wasm.curve_a.value, 486662n)
+writeU256(wasm.rist_2d.value, 2n * ristD)
 
 export function readU256(adr: number) {
   return $u256.decode(mem.subarray(adr, adr + 32))
