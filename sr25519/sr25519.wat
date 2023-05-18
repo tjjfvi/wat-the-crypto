@@ -537,9 +537,9 @@
   )
 
   ;; o: &coef; x: &coef; y: &coef
-  ;; *o = (*x) * (*y)
+  ;; *x *= *y
   (export "coef_mul" (func $coef_mul))
-  (func $coef_mul (param $o i32) (param $x i32) (param $y i32)
+  (func $coef_mul (param $x i32) (param $y i32)
     (call $u256_mul_u512 (global.get $coef_mul_tmp) (local.get $x) (local.get $y))
     (call $u256_mod_neg (global.get $coef_mul_tmp) (global.get $neg_coef))
     (call $u256_mod_neg (global.get $coef_mul_tmp_shr_256) (global.get $neg_coef))
@@ -549,7 +549,7 @@
       (i64.mul (i64.extend_i32_u) (i64.const 38))
     ))
     (call $u256_mod_neg (global.get $coef_mul_tmp) (global.get $neg_coef))
-    (memory.copy (local.get $o) (global.get $coef_mul_tmp) (i32.const 32))
+    (memory.copy (local.get $x) (global.get $coef_mul_tmp) (i32.const 32))
     (memory.fill (global.get $coef_mul_tmp) (i32.const 0) (i32.const 64))
   )
 
@@ -569,9 +569,9 @@
   )
 
   ;; o: &coef; x: &coef; y: &coef
-  ;; *o = (*x) * (*y)
+  ;; *x *= (*y)
   (export "exp_mul" (func $exp_mul))
-  (func $exp_mul (param $o i32) (param $x i32) (param $y i32)
+  (func $exp_mul (param $x i32) (param $y i32)
     (local $n i32)
     (call $u256_mul_u512 (global.get $exp_mul_tmp) (local.get $x) (local.get $y))
     (call $u256_mod_neg (global.get $exp_mul_tmp_shr_256) (global.get $neg_exp))
@@ -588,32 +588,36 @@
       (call $u256_mod_neg (local.get $n) (global.get $neg_exp))
       (br_if $n (i32.gt_u (local.get $n) (global.get $exp_mul_tmp)))
     )
-    (memory.copy (local.get $o) (global.get $exp_mul_tmp) (i32.const 32))
+    (memory.copy (local.get $x) (global.get $exp_mul_tmp) (i32.const 32))
     (memory.fill (global.get $exp_mul_tmp) (i32.const 0) (i32.const 64))
   )
 
-  (table $fns 1024 funcref)
-  (elem (i32.const 100)
-    $coef_mul_eq
-  )
-
-  (func $coef_mul_eq (type $mul_fn) (param $x i32) (param $y i32)
-    (call $coef_mul (local.get $x) (local.get $x) (local.get $y))
+  (table $fns 2 funcref)
+  (elem (i32.const 0)
+    $coef_mul
+    $coef_sqr
   )
 
   ;; <T> x: &T, y: &T
   ;; *x *= *y
   (type $mul_fn (func (param i32) (param i32)))
+  ;; <T> x: &T
+  ;; *x *= *x
+  (type $sqr_fn (func (param i32)))
+
+  (func $coef_sqr (param $x i32)
+    (call $coef_mul (local.get $x) (local.get $x))
+  )
 
   ;; <T> o: &T; x: &T; e: u32; f: &mul_fn<T>
   ;; *o = *o^u32 * (*x)^e
-  (func $pow_u32 (param $o i32) (param $x i32) (param $e i32) (param $f i32)
+  (func $pow_u32 (param $o i32) (param $x i32) (param $e i32) (param $mul i32) (param $sqr i32)
     (local $m i32)
     (local.set $m (i32.const 0x80000000))
     (loop $m
-      (call_indirect $fns (type $mul_fn) (local.get $o) (local.get $o) (local.get $f))
+      (call_indirect $fns (type $sqr_fn) (local.get $o) (local.get $sqr))
       (if (i32.and (local.get $e) (local.get $m)) (then
-        (call_indirect $fns (type $mul_fn) (local.get $o) (local.get $x) (local.get $f))
+        (call_indirect $fns (type $mul_fn) (local.get $o) (local.get $x) (local.get $mul))
       ))
       (br_if $m (local.tee $m (i32.shr_u (local.get $m) (i32.const 1))))
     )
@@ -621,11 +625,11 @@
 
   ;; <T> o: &T; x: &T; e: &u256; f: &mul_fn<T>
   ;; *o = *o^(u256) * (*x)^(*e)
-  (func $pow (param $o i32) (param $x i32) (param $e i32) (param $f i32)
+  (func $pow (param $o i32) (param $x i32) (param $e i32) (param $mul i32) (param $sqr i32)
     (local $m i32)
     (local.set $m (i32.add (local.get $e) (i32.const 28)))
     (loop $m
-      (call $pow_u32 (local.get $o) (local.get $x) (i32.load (local.get $m)) (local.get $f))
+      (call $pow_u32 (local.get $o) (local.get $x) (i32.load (local.get $m)) (local.get $mul) (local.get $sqr))
       (local.tee $m (i32.sub (local.get $m) (i32.const 4)))
       (br_if $m (i32.ge_u (local.get $e)))
     )
@@ -636,6 +640,6 @@
   (export "coef_inv" (func $coef_inv))
   (func $coef_inv (param $o i32) (param $x i32)
     (memory.copy (local.get $o) (global.get $one) (i32.const 32))
-    (call $pow (local.get $o) (local.get $x) (global.get $coef_neg_two) (i32.const 100))
+    (call $pow (local.get $o) (local.get $x) (global.get $coef_neg_two) (i32.const 0) (i32.const 1))
   )
 )

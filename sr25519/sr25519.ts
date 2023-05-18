@@ -34,9 +34,9 @@ interface Sr25519Wasm {
   u256_mod_neg(x: number, y: number): number
   _u256_mul_u512(o: number, x: number, y: number): void
   coef_add(o: number, x: number): void
-  coef_mul(o: number, x: number, y: number): void
+  coef_mul(x: number, y: number): void
   exp_add(o: number, x: number): void
-  exp_mul(o: number, x: number, y: number): void
+  exp_mul(x: number, y: number): void
   coef_inv(o: number, x: number): void
 }
 

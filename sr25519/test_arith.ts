@@ -82,8 +82,8 @@ for (const aU256 of u256s) {
   for (const bU256 of u256s) {
     writeU256(aAdr, aU256)
     writeU256(bAdr, bU256)
-    wasm.coef_mul(oAdr, aAdr, bAdr)
-    assertU256Equals(readU256(oAdr), (aU256 * bU256) % coef)
+    wasm.coef_mul(aAdr, bAdr)
+    assertU256Equals(readU256(aAdr), (aU256 * bU256) % coef)
   }
 }
 
@@ -91,8 +91,8 @@ for (const aU256 of u256s) {
   for (const bU256 of u256s) {
     writeU256(aAdr, aU256)
     writeU256(bAdr, bU256)
-    wasm.exp_mul(oAdr, aAdr, bAdr)
-    assertU256Equals(readU256(oAdr), (aU256 * bU256) % exp)
+    wasm.exp_mul(aAdr, bAdr)
+    assertU256Equals(readU256(aAdr), (aU256 * bU256) % exp)
   }
 }
 
