@@ -63,7 +63,26 @@
   ;; 32 bytes
   (global $coef_mul_eq_tmp i32 (i32.const 576))
 
-  (global (export "free_adr") i32 (i32.const 608))
+  (global $rist_decomp_tmp_s i32 (i32.const 608))
+  (global $rist_decomp_tmp_u1 i32 (i32.const 640))
+  (global $rist_decomp_tmp_u2 i32 (i32.const 672))
+  (global $rist_decomp_tmp_v i32 (i32.const 704))
+  (global $rist_decomp_tmp_i i32 (i32.const 736))
+  (global $rist_decomp_tmp_dx i32 (i32.const 768))
+  (global $rist_decomp_tmp_dy i32 (i32.const 800))
+  (global $rist_decomp_tmp_u2_2 i32 (i32.const 832))
+
+  ;; 32 bytes
+  ;; 2
+  (global $two i32 (i32.const 864))
+  (data (i32.const 864) "\02")
+
+  ;; 32 bytes
+  ;; -121665/121666
+  (export "rist_d" (global $rist_d))
+  (global $rist_d i32 (i32.const 896))
+
+  (global (export "free_adr") i32 (i32.const 896))
 
   (export "keccak_f1600" (func $keccak_f1600))
   (func $keccak_f1600 (param $adr i32)
@@ -641,5 +660,78 @@
   (func $coef_inv (param $o i32) (param $x i32)
     (memory.copy (local.get $o) (global.get $one) (i32.const 32))
     (call $pow (local.get $o) (local.get $x) (global.get $coef_neg_two) (i32.const 0) (i32.const 1))
+  )
+
+  ;; *n == 0
+  (func $u256_eqz (param $n i32) (result i32)
+    (i64.eqz (i64.load offset=0 (local.get $n)))
+    (i32.and (i64.eqz (i64.load offset=8 (local.get $n))))
+    (i32.and (i64.eqz (i64.load offset=16 (local.get $n))))
+    (i32.and (i64.eqz (i64.load offset=24 (local.get $n))))
+  )
+
+  (func $coef_invsqrt)
+
+  (func $rist_decomp (param $o i32) (param $s i32) (result i32)
+    (local $y i32)
+    (local $t i32)
+
+    (memory.copy (global.get $rist_decomp_tmp_s) (local.get $s) (i32.const 32))
+    (if (call $_u256_add (global.get $rist_decomp_tmp_s) (i64.const 1) (global.get $neg_coef) (i64.const 0)) (then) (else
+      (return (i32.const 1))
+    ))
+    (if (i32.and (i32.load8_u (local.get $s)) (i32.const 1)) (then
+      (return (i32.const 1))
+    ))
+    (memory.copy (global.get $rist_decomp_tmp_u1) (local.get $s) (i32.const 32))
+    (call $coef_sqr (global.get $rist_decomp_tmp_u1))
+    (memory.copy (global.get $rist_decomp_tmp_u2) (global.get $rist_decomp_tmp_u1) (i32.const 32))
+    (call $u256_sub (global.get $rist_decomp_tmp_u1) (global.get $coef) (global.get $rist_decomp_tmp_u1))
+    (call $coef_add (global.get $rist_decomp_tmp_u1) (global.get $one))
+    (call $coef_add (global.get $rist_decomp_tmp_u2) (global.get $one))
+
+    (memory.copy (global.get $rist_decomp_tmp_u2_2) (global.get $rist_decomp_tmp_u2) (i32.const 32))
+    (call $coef_sqr (global.get $rist_decomp_tmp_u2_2))
+
+    (memory.copy (global.get $rist_decomp_tmp_v) (global.get $rist_d) (i32.const 32))
+    (call $coef_mul (global.get $rist_decomp_tmp_v) (global.get $rist_decomp_tmp_u1))
+    (call $coef_mul (global.get $rist_decomp_tmp_v) (global.get $rist_decomp_tmp_u1))
+    (call $coef_add (global.get $rist_decomp_tmp_v) (global.get $rist_decomp_tmp_u2_2))
+    (call $u256_sub (global.get $rist_decomp_tmp_u1) (global.get $coef) (global.get $rist_decomp_tmp_u1))
+
+    (memory.copy (global.get $rist_decomp_tmp_i) (global.get $rist_decomp_tmp_v) (i32.const 32))
+    (call $coef_mul (global.get $rist_decomp_tmp_i) (global.get $rist_decomp_tmp_u2_2))
+    (call $coef_invsqrt (global.get $rist_decomp_tmp_i))
+
+    (memory.copy (global.get $rist_decomp_tmp_dx) (global.get $rist_decomp_tmp_i) (i32.const 32))
+    (call $coef_mul (global.get $rist_decomp_tmp_dx) (global.get $rist_decomp_tmp_u2))
+
+    (memory.copy (global.get $rist_decomp_tmp_dy) (global.get $rist_decomp_tmp_i) (i32.const 32))
+    (call $coef_mul (global.get $rist_decomp_tmp_dy) (global.get $rist_decomp_tmp_dx))
+    (call $coef_mul (global.get $rist_decomp_tmp_dy) (global.get $rist_decomp_tmp_v))
+
+    (memory.copy (local.get $o) (global.get $two) (i32.const 32))
+    (call $coef_mul (local.get $o) (local.get $s))
+    (call $coef_mul (local.get $o) (global.get $rist_decomp_tmp_dx))
+
+    (if (i32.and (i32.load8_u (local.get $s)) (i32.const 1)) (then
+      (call $u256_sub (local.get $o) (global.get $coef) (local.get $o))
+    ))
+
+    (local.tee $y (i32.add (local.get $o) (i32.const 32)))
+    (memory.copy (global.get $rist_decomp_tmp_u1) (i32.const 32))
+    (call $coef_mul (local.get $y) (global.get $rist_decomp_tmp_dy))
+
+    (memory.copy (i32.add (local.get $o) (i32.const 64)) (i32.const 32))
+
+    (local.tee $t (i32.add (local.get $o) (i32.const 96)))
+    (memory.copy (local.get $y) (i32.const 32))
+    (call $coef_mul (local.get $t) (local.get $o))
+
+    (if (i32.or (call $u256_eqz (local.get $y)) (i32.and (i32.load8_u (local.get $t)) (i32.const 1))) (then
+      (return (i32.const 1))
+    ))
+
+    (i32.const 0)
   )
 )
