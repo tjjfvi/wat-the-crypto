@@ -112,15 +112,6 @@ Deno.test("exp mul", () => {
   }
 })
 
-Deno.test("coef inv", () => {
-  for (const aU256 of u256s) {
-    if ((aU256 % coef) === 0n) continue
-    writeU256(aAdr, aU256 % coef)
-    wasm.coef_inv(oAdr, aAdr)
-    assertU256Equals(readU256(oAdr) * aU256 % coef, 1n)
-  }
-})
-
 Deno.test("coef invsqrt", () => {
   for (const aU256 of u256s) {
     if ((aU256 % coef) === 0n) continue

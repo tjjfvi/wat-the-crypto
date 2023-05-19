@@ -734,14 +734,6 @@
       )
     )
 
-    ;; o: &coef; x: &coef
-    ;; *o = 1 / (*x)
-    (export "coef_inv" (func $coef_inv))
-    (func $coef_inv (param $o i32) (param $x i32)
-      (memory.copy (local.get $o) (global.get $one) (i32.const 32))
-      (call $pow (local.get $o) (local.get $x) (global.get $coef_neg_two) (i32.const 0) (i32.const 1))
-    )
-
     ;; *n == 0
     (func $u256_eqz (param $n i32) (result i32)
       (i64.eqz (i64.load offset=0 (local.get $n)))

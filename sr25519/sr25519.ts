@@ -53,7 +53,6 @@ export function instantiate() {
     coef_mul(x: number, y: number): void
     exp_add(o: number, x: number): void
     exp_mul(x: number, y: number): void
-    coef_inv(o: number, x: number): void
     coef_invsqrt(o: number): number
 
     rist_decode(o: number, s: number): number
