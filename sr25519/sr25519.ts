@@ -53,7 +53,7 @@ interface Sr25519Wasm {
   rist_decode(o: number, s: number): number
   rist_encode(o: number, x: number): number
 
-  curve_double(x: number): void
+  curve_dbl(x: number): void
   curve_add(x: number, y: number): void
 }
 

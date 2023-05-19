@@ -88,7 +88,7 @@ for (const [a, b] of doublings) {
     wasm.free_adr.value,
   )
   wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
-  wasm.curve_double(wasm.free_adr.value + 32)
+  wasm.curve_dbl(wasm.free_adr.value + 32)
   wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
   assertEquals(
     encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)),
