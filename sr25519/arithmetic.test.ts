@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
 import { instantiate } from "./sr25519.ts"
 
-const { coef, coefI, exp, mem, readU256, u256, u512, wasm, writeU256 } = instantiate()
+const { field, fieldI, scalar, mem, readU256, u256, u512, wasm, writeU256 } = instantiate()
 
 const u256s = [
   0n,
@@ -11,12 +11,12 @@ const u256s = [
   1n << 32n,
   1n << 128n,
   u256 - 1n,
-  coef - 1n,
-  exp - 1n,
-  coef,
-  exp,
-  u256 - coef,
-  u256 - exp,
+  field - 1n,
+  scalar - 1n,
+  field,
+  scalar,
+  u256 - field,
+  u256 - scalar,
 ]
 
 for (let i = 0; i < 512; i++) {
@@ -45,35 +45,35 @@ Deno.test("u256 add / sub", () => {
   }
 })
 
-Deno.test("mod coef / mod exp", () => {
+Deno.test("mod field / mod scalar", () => {
   for (const aU256 of u256s) {
     writeU256(aAdr, aU256)
-    wasm.u256_mod_neg(aAdr, wasm.neg_coef.value)
-    assertU256Equals(readU256(aAdr), aU256 % coef)
+    wasm.u256_mod_neg(aAdr, wasm.neg_field.value)
+    assertU256Equals(readU256(aAdr), aU256 % field)
     writeU256(aAdr, aU256)
-    wasm.u256_mod_neg(aAdr, wasm.neg_exp.value)
-    assertU256Equals(readU256(aAdr), aU256 % exp)
+    wasm.u256_mod_neg(aAdr, wasm.neg_scalar.value)
+    assertU256Equals(readU256(aAdr), aU256 % scalar)
   }
 })
 
-Deno.test("coef add", () => {
+Deno.test("field add", () => {
   for (const aU256 of u256s) {
     for (const bU256 of u256s) {
-      writeU256(aAdr, aU256 % coef)
-      writeU256(bAdr, bU256 % coef)
-      wasm.coef_add(aAdr, bAdr)
-      assertU256Equals(readU256(aAdr), (aU256 + bU256) % coef)
+      writeU256(aAdr, aU256 % field)
+      writeU256(bAdr, bU256 % field)
+      wasm.field_add(aAdr, bAdr)
+      assertU256Equals(readU256(aAdr), (aU256 + bU256) % field)
     }
   }
 })
 
-Deno.test("exp add", () => {
+Deno.test("scalar add", () => {
   for (const aU256 of u256s) {
     for (const bU256 of u256s) {
-      writeU256(aAdr, aU256 % exp)
-      writeU256(bAdr, bU256 % exp)
-      wasm.exp_add(aAdr, bAdr)
-      assertU256Equals(readU256(aAdr), (aU256 + bU256) % exp)
+      writeU256(aAdr, aU256 % scalar)
+      writeU256(bAdr, bU256 % scalar)
+      wasm.scalar_add(aAdr, bAdr)
+      assertU256Equals(readU256(aAdr), (aU256 + bU256) % scalar)
     }
   }
 })
@@ -90,36 +90,36 @@ Deno.test("u256 mul u512", () => {
   }
 })
 
-Deno.test("coef mul", () => {
+Deno.test("field mul", () => {
   for (const aU256 of u256s) {
     for (const bU256 of u256s) {
       writeU256(aAdr, aU256)
       writeU256(bAdr, bU256)
-      wasm.coef_mul(aAdr, bAdr)
-      assertU256Equals(readU256(aAdr), (aU256 * bU256) % coef)
+      wasm.field_mul(aAdr, bAdr)
+      assertU256Equals(readU256(aAdr), (aU256 * bU256) % field)
     }
   }
 })
 
-Deno.test("exp mul", () => {
+Deno.test("scalar mul", () => {
   for (const aU256 of u256s) {
     for (const bU256 of u256s) {
       writeU256(aAdr, aU256)
       writeU256(bAdr, bU256)
-      wasm.exp_mul(aAdr, bAdr)
-      assertU256Equals(readU256(aAdr), (aU256 * bU256) % exp)
+      wasm.scalar_mul(aAdr, bAdr)
+      assertU256Equals(readU256(aAdr), (aU256 * bU256) % scalar)
     }
   }
 })
 
-Deno.test("coef invsqrt", () => {
+Deno.test("field invsqrt", () => {
   for (const aU256 of u256s) {
-    if ((aU256 % coef) === 0n) continue
-    writeU256(aAdr, aU256 % coef)
-    if (wasm.coef_invsqrt(aAdr)) {
-      assertU256Equals(readU256(aAdr) ** 2n * aU256 % coef, 1n)
+    if ((aU256 % field) === 0n) continue
+    writeU256(aAdr, aU256 % field)
+    if (wasm.field_invsqrt(aAdr)) {
+      assertU256Equals(readU256(aAdr) ** 2n * aU256 % field, 1n)
     } else {
-      assertU256Equals(readU256(aAdr) ** 2n * aU256 % coef, coefI)
+      assertU256Equals(readU256(aAdr) ** 2n * aU256 % field, fieldI)
     }
   }
 })

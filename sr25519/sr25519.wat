@@ -2,7 +2,6 @@
   (import "host" "memory" (memory 1))
   (import "keccak" "keccak_f1600" (func $keccak_f1600 (param i32)))
 
-
   ;; mem-start: 192
 
   ;; (import "log" "u32" (func $log_u32 (param i32)))
@@ -16,32 +15,32 @@
   ;; (func $dbg_i64 (param $v i64) (result i64) local.get $v call $log_i64 local.get $v)
 
   ;; 32 bytes
-  (export "coef" (global $coef))
-  (global $coef i32 (i32.const 192))
+  (export "field" (global $field))
+  (global $field i32 (i32.const 192))
 
   ;; 32 bytes
-  (export "exp" (global $exp))
-  (global $exp i32 (i32.const 224))
+  (export "scalar" (global $scalar))
+  (global $scalar i32 (i32.const 224))
 
   ;; 32 bytes
-  ;; u256 - coef
-  (export "neg_coef" (global $neg_coef))
-  (global $neg_coef i32 (i32.const 256))
+  ;; u256 - field
+  (export "neg_field" (global $neg_field))
+  (global $neg_field i32 (i32.const 256))
 
   ;; 32 bytes
-  ;; -exp
-  (export "neg_exp" (global $neg_exp))
-  (global $neg_exp i32 (i32.const 288))
+  ;; -scalar
+  (export "neg_scalar" (global $neg_scalar))
+  (global $neg_scalar i32 (i32.const 288))
 
   ;; 32 bytes
-  ;; u256 % exp
-  (export "u256_mod_exp" (global $u256_mod_exp))
-  (global $u256_mod_exp i32 (i32.const 320))
+  ;; u256 % scalar
+  (export "u256_mod_scalar" (global $u256_mod_scalar))
+  (global $u256_mod_scalar i32 (i32.const 320))
 
   ;; 32 bytes
-  ;; coef - 2
-  (export "coef_neg_two" (global $coef_neg_two))
-  (global $coef_neg_two i32 (i32.const 352))
+  ;; field - 2
+  (export "field_neg_two" (global $field_neg_two))
+  (global $field_neg_two i32 (i32.const 352))
 
   ;; 32 bytes
   ;; 1
@@ -52,15 +51,15 @@
   (global $u256_mod_tmp i32 (i32.const 416))
 
   ;; 64 bytes
-  (global $coef_mul_tmp i32 (i32.const 448))
-  (global $coef_mul_tmp_shr_256 i32 (i32.const 480))
+  (global $field_mul_tmp i32 (i32.const 448))
+  (global $field_mul_tmp_shr_256 i32 (i32.const 480))
 
   ;; 64 bytes
-  (global $exp_mul_tmp i32 (i32.const 512))
-  (global $exp_mul_tmp_shr_256 i32 (i32.const 544))
+  (global $scalar_mul_tmp i32 (i32.const 512))
+  (global $scalar_mul_tmp_shr_256 i32 (i32.const 544))
 
   ;; 32 bytes
-  (global $coef_mul_eq_tmp i32 (i32.const 576))
+  (global $field_mul_eq_tmp i32 (i32.const 576))
 
   (global $rist_code_tmp_s i32 (i32.const 608))
   (global $rist_code_tmp_u1 i32 (i32.const 640))
@@ -82,27 +81,27 @@
   (global $rist_d i32 (i32.const 896))
 
   ;; 32 bytes
-  ;; 3 + 7 * (coef - 5) / 8
-  (export "coef_invsqrt_pow" (global $coef_invsqrt_pow))
-  (global $coef_invsqrt_pow i32 (i32.const 928))
+  ;; 3 + 7 * (field - 5) / 8
+  (export "field_invsqrt_pow" (global $field_invsqrt_pow))
+  (global $field_invsqrt_pow i32 (i32.const 928))
 
   ;; 32 bytes
   ;; sqrt(-1)
-  (export "coef_i" (global $coef_i))
-  (global $coef_i i32 (i32.const 960))
+  (export "field_i" (global $field_i))
+  (global $field_i i32 (i32.const 960))
 
   ;; 32 bytes
   ;; -sqrt(-1)
-  (export "coef_neg_i" (global $coef_neg_i))
-  (global $coef_neg_i i32 (i32.const 992))
+  (export "field_neg_i" (global $field_neg_i))
+  (global $field_neg_i i32 (i32.const 992))
 
   ;; 32 bytes
-  ;; coef - 1
-  (export "coef_neg_one" (global $coef_neg_one))
-  (global $coef_neg_one i32 (i32.const 1024))
+  ;; field - 1
+  (export "field_neg_one" (global $field_neg_one))
+  (global $field_neg_one i32 (i32.const 1024))
 
-  (global $coef_invsqrt_tmp_r i32 (i32.const 1056))
-  (global $coef_invsqrt_tmp_c i32 (i32.const 1088))
+  (global $field_invsqrt_tmp_r i32 (i32.const 1056))
+  (global $field_invsqrt_tmp_c i32 (i32.const 1088))
 
   ;; 32 bytes
   ;; 1 / sqrt(-1 - d)
@@ -435,16 +434,16 @@
       (memory.fill (global.get $u256_mod_tmp) (i32.const 0) (i32.const 32))
     )
 
-    (export "coef_add" (func $coef_add))
-    (func $coef_add (param $o i32) (param $x i32)
+    (export "field_add" (func $field_add))
+    (func $field_add (param $o i32) (param $x i32)
       (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 0)))
-      (call $u256_mod_neg (local.get $o) (global.get $neg_coef))
+      (call $u256_mod_neg (local.get $o) (global.get $neg_field))
     )
 
-    (export "exp_add" (func $exp_add))
-    (func $exp_add (param $o i32) (param $x i32)
+    (export "scalar_add" (func $scalar_add))
+    (func $scalar_add (param $o i32) (param $x i32)
       (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 0)))
-      (call $u256_mod_neg (local.get $o) (global.get $neg_exp))
+      (call $u256_mod_neg (local.get $o) (global.get $neg_scalar))
     )
 
     ;; *o = (*o as u256) + ((*x) * (*y))
@@ -500,21 +499,21 @@
       ))
     )
 
-    ;; o: &coef; x: &coef; y: &coef
+    ;; o: &field; x: &field; y: &field
     ;; *x *= *y
-    (export "coef_mul" (func $coef_mul))
-    (func $coef_mul (param $x i32) (param $y i32)
-      (call $u256_mul_u512 (global.get $coef_mul_tmp) (local.get $x) (local.get $y))
-      (call $u256_mod_neg (global.get $coef_mul_tmp) (global.get $neg_coef))
-      (call $u256_mod_neg (global.get $coef_mul_tmp_shr_256) (global.get $neg_coef))
-      (drop (call $_u256_add (global.get $coef_mul_tmp) (i64.const 0) (global.get $coef_mul_tmp_shr_256)
-        (call $_u256_add (global.get $coef_mul_tmp) (i64.const 38) (global.get $coef_mul_tmp_shr_256) (i64.const 0))
-        (call $u256_mod_neg (global.get $coef_mul_tmp) (global.get $neg_coef))
+    (export "field_mul" (func $field_mul))
+    (func $field_mul (param $x i32) (param $y i32)
+      (call $u256_mul_u512 (global.get $field_mul_tmp) (local.get $x) (local.get $y))
+      (call $u256_mod_neg (global.get $field_mul_tmp) (global.get $neg_field))
+      (call $u256_mod_neg (global.get $field_mul_tmp_shr_256) (global.get $neg_field))
+      (drop (call $_u256_add (global.get $field_mul_tmp) (i64.const 0) (global.get $field_mul_tmp_shr_256)
+        (call $_u256_add (global.get $field_mul_tmp) (i64.const 38) (global.get $field_mul_tmp_shr_256) (i64.const 0))
+        (call $u256_mod_neg (global.get $field_mul_tmp) (global.get $neg_field))
         (i64.mul (i64.extend_i32_u) (i64.const 38))
       ))
-      (call $u256_mod_neg (global.get $coef_mul_tmp) (global.get $neg_coef))
-      (memory.copy (local.get $x) (global.get $coef_mul_tmp) (i32.const 32))
-      (memory.fill (global.get $coef_mul_tmp) (i32.const 0) (i32.const 64))
+      (call $u256_mod_neg (global.get $field_mul_tmp) (global.get $neg_field))
+      (memory.copy (local.get $x) (global.get $field_mul_tmp) (i32.const 32))
+      (memory.fill (global.get $field_mul_tmp) (i32.const 0) (i32.const 64))
     )
 
     ;; *o = ~(*x)
@@ -532,11 +531,11 @@
       (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 1)))
     )
 
-    (func $u512_mod_exp (param $x i32) (local $n i32)
+    (func $u512_mod_scalar (param $x i32) (local $n i32)
       (local.set $n (i32.add (local.get $x) (i32.const 32)))
       (loop $n
         (local.tee $n (i32.sub (local.get $n) (i32.const 1)))
-        (call $u256_mod_neg (global.get $neg_exp))
+        (call $u256_mod_neg (global.get $neg_scalar))
         (drop (call $_u256_add
           (local.get $n)
           (i64.extend_i32_u
@@ -546,37 +545,37 @@
                 (call $_u256_add
                   (local.get $n)
                   (i64.load8_u offset=32 (local.get $n))
-                  (global.get $u256_mod_exp)
+                  (global.get $u256_mod_scalar)
                   (i64.const 0)
                 )
               )
-              (global.get $u256_mod_exp)
+              (global.get $u256_mod_scalar)
               (i64.const 0)
             )
           )
-          (global.get $u256_mod_exp)
+          (global.get $u256_mod_scalar)
           (i64.const 0)
         ))
-        (call $u256_mod_neg (local.get $n) (global.get $neg_exp))
+        (call $u256_mod_neg (local.get $n) (global.get $neg_scalar))
         (br_if $n (i32.gt_u (local.get $n) (local.get $x)))
       )
     )
 
-    ;; o: &coef; x: &coef; y: &coef
+    ;; o: &field; x: &field; y: &field
     ;; *x *= (*y)
-    (export "exp_mul" (func $exp_mul))
-    (func $exp_mul (param $x i32) (param $y i32)
+    (export "scalar_mul" (func $scalar_mul))
+    (func $scalar_mul (param $x i32) (param $y i32)
       (local $n i32)
-      (call $u256_mul_u512 (global.get $exp_mul_tmp) (local.get $x) (local.get $y))
-      (call $u256_mod_neg (global.get $exp_mul_tmp_shr_256) (global.get $neg_exp))
-      (call $u512_mod_exp (global.get $exp_mul_tmp))
-      (memory.copy (local.get $x) (global.get $exp_mul_tmp) (i32.const 32))
-      (memory.fill (global.get $exp_mul_tmp) (i32.const 0) (i32.const 64))
+      (call $u256_mul_u512 (global.get $scalar_mul_tmp) (local.get $x) (local.get $y))
+      (call $u256_mod_neg (global.get $scalar_mul_tmp_shr_256) (global.get $neg_scalar))
+      (call $u512_mod_scalar (global.get $scalar_mul_tmp))
+      (memory.copy (local.get $x) (global.get $scalar_mul_tmp) (i32.const 32))
+      (memory.fill (global.get $scalar_mul_tmp) (i32.const 0) (i32.const 64))
     )
 
     (table $fns 2 funcref)
     (elem (i32.const 0)
-      $coef_mul
+      $field_mul
       $curve_add
     )
 
@@ -626,34 +625,34 @@
       (i32.and (i64.eq (i64.load offset=24 (local.get $a)) (i64.load offset=24 (local.get $b))))
     )
 
-    (export "coef_invsqrt" (func $coef_invsqrt))
-    (func $coef_invsqrt (param $x i32) (result i32)
+    (export "field_invsqrt" (func $field_invsqrt))
+    (func $field_invsqrt (param $x i32) (result i32)
       (local $n i32)
 
-      (memory.copy (global.get $coef_invsqrt_tmp_r) (global.get $one) (i32.const 32))
-      (call $pow (global.get $coef_invsqrt_tmp_r) (local.get $x) (global.get $coef_invsqrt_pow) (i32.const 0))
+      (memory.copy (global.get $field_invsqrt_tmp_r) (global.get $one) (i32.const 32))
+      (call $pow (global.get $field_invsqrt_tmp_r) (local.get $x) (global.get $field_invsqrt_pow) (i32.const 0))
 
-      (memory.copy (global.get $coef_invsqrt_tmp_c) (global.get $coef_invsqrt_tmp_r) (i32.const 32))
-      (call $coef_mul (global.get $coef_invsqrt_tmp_c) (global.get $coef_invsqrt_tmp_c))
-      (call $coef_mul (global.get $coef_invsqrt_tmp_c) (local.get $x))
+      (memory.copy (global.get $field_invsqrt_tmp_c) (global.get $field_invsqrt_tmp_r) (i32.const 32))
+      (call $field_mul (global.get $field_invsqrt_tmp_c) (global.get $field_invsqrt_tmp_c))
+      (call $field_mul (global.get $field_invsqrt_tmp_c) (local.get $x))
 
       (if (i32.or
-        (local.tee $n (call $u256_eq (global.get $coef_invsqrt_tmp_c) (global.get $coef_neg_one)))
-        (call $u256_eq (global.get $coef_invsqrt_tmp_c) (global.get $coef_neg_i))
+        (local.tee $n (call $u256_eq (global.get $field_invsqrt_tmp_c) (global.get $field_neg_one)))
+        (call $u256_eq (global.get $field_invsqrt_tmp_c) (global.get $field_neg_i))
       ) (then
-        (call $coef_mul (global.get $coef_invsqrt_tmp_r) (global.get $coef_i))
+        (call $field_mul (global.get $field_invsqrt_tmp_r) (global.get $field_i))
       ))
 
       (i32.or
-        (call $u256_eq (global.get $coef_invsqrt_tmp_c) (global.get $one))
+        (call $u256_eq (global.get $field_invsqrt_tmp_c) (global.get $one))
         (local.get $n)
       )
 
-      (if (i32.and (i32.load8_u (global.get $coef_invsqrt_tmp_r)) (i32.const 1)) (then
-        (call $u256_sub (global.get $coef_invsqrt_tmp_r) (global.get $coef) (global.get $coef_invsqrt_tmp_r))
+      (if (i32.and (i32.load8_u (global.get $field_invsqrt_tmp_r)) (i32.const 1)) (then
+        (call $u256_sub (global.get $field_invsqrt_tmp_r) (global.get $field) (global.get $field_invsqrt_tmp_r))
       ))
 
-      (memory.copy (local.get $x) (global.get $coef_invsqrt_tmp_r) (i32.const 32))
+      (memory.copy (local.get $x) (global.get $field_invsqrt_tmp_r) (i32.const 32))
     )
 
     (export "rist_decode" (func $rist_decode))
@@ -664,7 +663,7 @@
       (memory.fill (global.get $rist_code_tmp_s) (i32.const 0) (i32.const 256))
 
       (memory.copy (global.get $rist_code_tmp_s) (local.get $s) (i32.const 32))
-      (if (call $_u256_add (global.get $rist_code_tmp_s) (i64.const 1) (global.get $neg_coef) (i64.const 0)) (then
+      (if (call $_u256_add (global.get $rist_code_tmp_s) (i64.const 1) (global.get $neg_field) (i64.const 0)) (then
         (return (i32.const 1))
       ))
       (if (i32.and (i32.load8_u (local.get $s)) (i32.const 1)) (then
@@ -672,56 +671,56 @@
       ))
 
       (memory.copy (global.get $rist_code_tmp_u1) (local.get $s) (i32.const 32)) ;; u1 = s
-      (call $coef_mul (global.get $rist_code_tmp_u1) (global.get $rist_code_tmp_u1)) ;; u1 = s^2
+      (call $field_mul (global.get $rist_code_tmp_u1) (global.get $rist_code_tmp_u1)) ;; u1 = s^2
       (memory.copy (global.get $rist_code_tmp_u2) (global.get $rist_code_tmp_u1) (i32.const 32)) ;; u2 = s^2
-      (call $u256_sub (global.get $rist_code_tmp_u1) (global.get $coef) (global.get $rist_code_tmp_u1)) ;; u1 = -s^2
-      (call $coef_add (global.get $rist_code_tmp_u1) (global.get $one)) ;; u1 = 1 - s^2
-      (call $coef_add (global.get $rist_code_tmp_u2) (global.get $one)) ;; u2 = 1 + s^2
+      (call $u256_sub (global.get $rist_code_tmp_u1) (global.get $field) (global.get $rist_code_tmp_u1)) ;; u1 = -s^2
+      (call $field_add (global.get $rist_code_tmp_u1) (global.get $one)) ;; u1 = 1 - s^2
+      (call $field_add (global.get $rist_code_tmp_u2) (global.get $one)) ;; u2 = 1 + s^2
 
       (memory.copy (global.get $rist_code_tmp_u2_2) (global.get $rist_code_tmp_u2) (i32.const 32)) ;; u2_2 = u2
-      (call $coef_mul (global.get $rist_code_tmp_u2_2) (global.get $rist_code_tmp_u2_2)) ;; u2_2 = u2^2
+      (call $field_mul (global.get $rist_code_tmp_u2_2) (global.get $rist_code_tmp_u2_2)) ;; u2_2 = u2^2
 
       (memory.copy (global.get $rist_code_tmp_v) (global.get $rist_d) (i32.const 32)) ;; v = d
-      (call $coef_mul (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u1)) ;; v = d u1
-      (call $coef_mul (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u1)) ;; v = d u1^2
-      (call $coef_add (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u2_2)) ;; v = d u1^2 + u2^2
-      (call $u256_sub (global.get $rist_code_tmp_v) (global.get $coef) (global.get $rist_code_tmp_v)) ;; v = - d u1^2 - u2^2
+      (call $field_mul (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u1)) ;; v = d u1
+      (call $field_mul (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u1)) ;; v = d u1^2
+      (call $field_add (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u2_2)) ;; v = d u1^2 + u2^2
+      (call $u256_sub (global.get $rist_code_tmp_v) (global.get $field) (global.get $rist_code_tmp_v)) ;; v = - d u1^2 - u2^2
 
       (memory.copy (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_v) (i32.const 32)) ;; i = v
-      (call $coef_mul (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_u2_2)) ;; i = v u2^2
+      (call $field_mul (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_u2_2)) ;; i = v u2^2
       (if (call $u256_eqz (global.get $rist_code_tmp_i)) (then
         (return (i32.const 3))
       ))
-      (if (call $coef_invsqrt (global.get $rist_code_tmp_i)) (then) (else
+      (if (call $field_invsqrt (global.get $rist_code_tmp_i)) (then) (else
         (return (i32.const 4))
       ))
       ;; i = invsqrt(v u2^2)
 
       (memory.copy (global.get $rist_code_tmp_dx) (global.get $rist_code_tmp_i) (i32.const 32)) ;; dx = i
-      (call $coef_mul (global.get $rist_code_tmp_dx) (global.get $rist_code_tmp_u2)) ;; dx = i u2
+      (call $field_mul (global.get $rist_code_tmp_dx) (global.get $rist_code_tmp_u2)) ;; dx = i u2
 
       (memory.copy (global.get $rist_code_tmp_dy) (global.get $rist_code_tmp_i) (i32.const 32)) ;; dy = i
-      (call $coef_mul (global.get $rist_code_tmp_dy) (global.get $rist_code_tmp_dx)) ;; dy = i dx
-      (call $coef_mul (global.get $rist_code_tmp_dy) (global.get $rist_code_tmp_v)) ;; dy = i dx v
+      (call $field_mul (global.get $rist_code_tmp_dy) (global.get $rist_code_tmp_dx)) ;; dy = i dx
+      (call $field_mul (global.get $rist_code_tmp_dy) (global.get $rist_code_tmp_v)) ;; dy = i dx v
 
       (memory.copy (local.get $o) (global.get $two) (i32.const 32)) ;; x = 2
-      (call $coef_mul (local.get $o) (local.get $s)) ;; x = 2 s
-      (call $coef_mul (local.get $o) (global.get $rist_code_tmp_dx)) ;; x = 2 s dx
+      (call $field_mul (local.get $o) (local.get $s)) ;; x = 2 s
+      (call $field_mul (local.get $o) (global.get $rist_code_tmp_dx)) ;; x = 2 s dx
 
       (if (i32.and (i32.load8_u (local.get $o)) (i32.const 1)) (then
-        (call $u256_sub (local.get $o) (global.get $coef) (local.get $o))
+        (call $u256_sub (local.get $o) (global.get $field) (local.get $o))
       ))
       ;; x = | 2 s dx |
 
       (local.tee $y (i32.add (local.get $o) (i32.const 32)))
       (memory.copy (global.get $rist_code_tmp_u1) (i32.const 32)) ;; y = u1
-      (call $coef_mul (local.get $y) (global.get $rist_code_tmp_dy)) ;; y = u1 dy
+      (call $field_mul (local.get $y) (global.get $rist_code_tmp_dy)) ;; y = u1 dy
 
       (memory.copy (i32.add (local.get $o) (i32.const 64)) (global.get $one) (i32.const 32))
 
       (local.tee $t (i32.add (local.get $o) (i32.const 96)))
       (memory.copy (local.get $y) (i32.const 32)) ;; t = y
-      (call $coef_mul (local.get $t) (local.get $o)) ;; t = x y
+      (call $field_mul (local.get $t) (local.get $o)) ;; t = x y
 
       (if (i32.or
         (call $u256_eqz (local.get $y))
@@ -742,43 +741,43 @@
       (local.set $t (i32.add (local.get $x) (i32.const 96)))
 
       (memory.copy (global.get $rist_code_tmp_u1) (local.get $z) (i32.const 32)) ;; u1 = z
-      (call $coef_add (global.get $rist_code_tmp_u1) (local.get $y)) ;; u1 = z + y
+      (call $field_add (global.get $rist_code_tmp_u1) (local.get $y)) ;; u1 = z + y
 
       (memory.copy (global.get $rist_code_tmp_s) (local.get $y) (i32.const 32)) ;; n = y
-      (call $u256_sub (global.get $rist_code_tmp_s) (global.get $coef) (global.get $rist_code_tmp_s)) ;; n = -y
-      (call $coef_add (global.get $rist_code_tmp_s) (local.get $z)) ;; n = z - y
+      (call $u256_sub (global.get $rist_code_tmp_s) (global.get $field) (global.get $rist_code_tmp_s)) ;; n = -y
+      (call $field_add (global.get $rist_code_tmp_s) (local.get $z)) ;; n = z - y
 
-      (call $coef_mul (global.get $rist_code_tmp_u1) (global.get $rist_code_tmp_s)) ;; u1 = (z + y) (z - y)
+      (call $field_mul (global.get $rist_code_tmp_u1) (global.get $rist_code_tmp_s)) ;; u1 = (z + y) (z - y)
 
       (memory.copy (global.get $rist_code_tmp_u2) (local.get $x) (i32.const 32)) ;; u2 = x
-      (call $coef_mul (global.get $rist_code_tmp_u2) (local.get $y)) ;; u2 = x y
+      (call $field_mul (global.get $rist_code_tmp_u2) (local.get $y)) ;; u2 = x y
 
       (memory.copy (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_u2) (i32.const 32)) ;; i = u2
-      (call $coef_mul (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_i)) ;; i = u2^2
-      (call $coef_mul (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_u1)) ;; i = u1 u2^2
-      (drop (call $coef_invsqrt (global.get $rist_code_tmp_i))) ;; i = invsqrt(u1 u2^2)
+      (call $field_mul (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_i)) ;; i = u2^2
+      (call $field_mul (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_u1)) ;; i = u1 u2^2
+      (drop (call $field_invsqrt (global.get $rist_code_tmp_i))) ;; i = invsqrt(u1 u2^2)
 
       ;; d1 = u1
       ;; d2 = u2
-      (call $coef_mul (global.get $rist_code_tmp_u1) (global.get $rist_code_tmp_i)) ;; d1 = u1 i
-      (call $coef_mul (global.get $rist_code_tmp_u2) (global.get $rist_code_tmp_i)) ;; d2 = u2 i
+      (call $field_mul (global.get $rist_code_tmp_u1) (global.get $rist_code_tmp_i)) ;; d1 = u1 i
+      (call $field_mul (global.get $rist_code_tmp_u2) (global.get $rist_code_tmp_i)) ;; d2 = u2 i
 
       (memory.copy (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u1) (i32.const 32)) ;; z_inv = d1
-      (call $coef_mul (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u2)) ;; z_inv = d1 d2
-      (call $coef_mul (global.get $rist_code_tmp_v) (local.get $t)) ;; z_inv = d1 d2 t
+      (call $field_mul (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u2)) ;; z_inv = d1 d2
+      (call $field_mul (global.get $rist_code_tmp_v) (local.get $t)) ;; z_inv = d1 d2 t
 
       (memory.copy (global.get $rist_code_tmp_s) (global.get $rist_code_tmp_v) (i32.const 32)) ;; n = z_inv
-      (call $coef_mul (global.get $rist_code_tmp_s) (local.get $t)) ;; n = t z_inv
+      (call $field_mul (global.get $rist_code_tmp_s) (local.get $t)) ;; n = t z_inv
 
       (if (i32.and (i32.load8_u (global.get $rist_code_tmp_s)) (i32.const 1)) (then
         (memory.copy (global.get $rist_code_tmp_dx) (local.get $y) (i32.const 32)) ;; dx = y
-        (call $coef_mul (global.get $rist_code_tmp_dx) (global.get $coef_i)) ;; dx = i y
+        (call $field_mul (global.get $rist_code_tmp_dx) (global.get $field_i)) ;; dx = i y
 
         (memory.copy (global.get $rist_code_tmp_dy) (local.get $x) (i32.const 32)) ;; dy = x
-        (call $coef_mul (global.get $rist_code_tmp_dy) (global.get $coef_i)) ;; dy = i x
+        (call $field_mul (global.get $rist_code_tmp_dy) (global.get $field_i)) ;; dy = i x
 
         (memory.copy (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_u1) (i32.const 32)) ;; d = d1
-        (call $coef_mul (global.get $rist_code_tmp_i) (global.get $rist_inv_root_a_sub_d)) ;; d = d1 / sqrt(a - d)
+        (call $field_mul (global.get $rist_code_tmp_i) (global.get $rist_inv_root_a_sub_d)) ;; d = d1 / sqrt(a - d)
       ) (else
         (memory.copy (global.get $rist_code_tmp_dx) (local.get $x) (i32.const 32)) ;; dx = x
         (memory.copy (global.get $rist_code_tmp_dy) (local.get $y) (i32.const 32)) ;; dy = y
@@ -786,17 +785,17 @@
       ))
 
       (memory.copy (global.get $rist_code_tmp_s) (global.get $rist_code_tmp_v) (i32.const 32)) ;; n = z_inv
-      (call $coef_mul (global.get $rist_code_tmp_s) (global.get $rist_code_tmp_dx)) ;; n = dx z_inv
+      (call $field_mul (global.get $rist_code_tmp_s) (global.get $rist_code_tmp_dx)) ;; n = dx z_inv
 
       (if (i32.and (i32.load8_u (global.get $rist_code_tmp_s)) (i32.const 1)) (then) (else
-        (call $u256_sub (global.get $rist_code_tmp_dy) (global.get $coef) (global.get $rist_code_tmp_dy))
+        (call $u256_sub (global.get $rist_code_tmp_dy) (global.get $field) (global.get $rist_code_tmp_dy))
       ))
 
-      (call $coef_add (global.get $rist_code_tmp_dy) (local.get $z)) ;; s = (z - dy)
-      (call $coef_mul (global.get $rist_code_tmp_dy) (global.get $rist_code_tmp_i)) ;; s = (z - dy)d
+      (call $field_add (global.get $rist_code_tmp_dy) (local.get $z)) ;; s = (z - dy)
+      (call $field_mul (global.get $rist_code_tmp_dy) (global.get $rist_code_tmp_i)) ;; s = (z - dy)d
 
       (if (i32.and (i32.load8_u (global.get $rist_code_tmp_dy)) (i32.const 1)) (then
-        (call $u256_sub (global.get $rist_code_tmp_dy) (global.get $coef) (global.get $rist_code_tmp_dy))
+        (call $u256_sub (global.get $rist_code_tmp_dy) (global.get $field) (global.get $rist_code_tmp_dy))
       ))
       ;; s = |(z - dy)d|
 
@@ -817,47 +816,47 @@
       (local.set $bt (i32.add (local.get $bx) (i32.const 96)))
 
       (memory.copy (global.get $curve_add_tmp_pp) (local.get $ax) (i32.const 32))
-      (call $coef_add (global.get $curve_add_tmp_pp) (local.get $ay))
+      (call $field_add (global.get $curve_add_tmp_pp) (local.get $ay))
       (memory.copy (global.get $curve_add_tmp) (local.get $bx) (i32.const 32))
-      (call $coef_add (global.get $curve_add_tmp) (local.get $by))
-      (call $coef_mul (global.get $curve_add_tmp_pp) (global.get $curve_add_tmp))
+      (call $field_add (global.get $curve_add_tmp) (local.get $by))
+      (call $field_mul (global.get $curve_add_tmp_pp) (global.get $curve_add_tmp))
 
       (memory.copy (global.get $curve_add_tmp_mm) (local.get $ax) (i32.const 32))
-      (call $u256_sub (global.get $curve_add_tmp_mm) (global.get $coef) (global.get $curve_add_tmp_mm))
-      (call $coef_add (global.get $curve_add_tmp_mm) (local.get $ay))
+      (call $u256_sub (global.get $curve_add_tmp_mm) (global.get $field) (global.get $curve_add_tmp_mm))
+      (call $field_add (global.get $curve_add_tmp_mm) (local.get $ay))
       (memory.copy (global.get $curve_add_tmp) (local.get $bx) (i32.const 32))
-      (call $u256_sub (global.get $curve_add_tmp) (global.get $coef) (global.get $curve_add_tmp))
-      (call $coef_add (global.get $curve_add_tmp) (local.get $by))
-      (call $coef_mul (global.get $curve_add_tmp_mm) (global.get $curve_add_tmp))
+      (call $u256_sub (global.get $curve_add_tmp) (global.get $field) (global.get $curve_add_tmp))
+      (call $field_add (global.get $curve_add_tmp) (local.get $by))
+      (call $field_mul (global.get $curve_add_tmp_mm) (global.get $curve_add_tmp))
 
       (memory.copy (global.get $curve_add_tmp_tt2d) (local.get $at) (i32.const 32))
-      (call $coef_mul (global.get $curve_add_tmp_tt2d) (local.get $bt))
-      (call $coef_mul (global.get $curve_add_tmp_tt2d) (global.get $rist_2d))
+      (call $field_mul (global.get $curve_add_tmp_tt2d) (local.get $bt))
+      (call $field_mul (global.get $curve_add_tmp_tt2d) (global.get $rist_2d))
 
       (memory.copy (global.get $curve_add_tmp_zz2) (local.get $az) (i32.const 32))
-      (call $coef_mul (global.get $curve_add_tmp_zz2) (local.get $bz))
-      (call $coef_add (global.get $curve_add_tmp_zz2) (global.get $curve_add_tmp_zz2))
+      (call $field_mul (global.get $curve_add_tmp_zz2) (local.get $bz))
+      (call $field_add (global.get $curve_add_tmp_zz2) (global.get $curve_add_tmp_zz2))
 
       (memory.copy (global.get $curve_tmp_cx) (global.get $curve_add_tmp_mm) (i32.const 32))
-      (call $u256_sub (global.get $curve_tmp_cx) (global.get $coef) (global.get $curve_tmp_cx))
-      (call $coef_add (global.get $curve_tmp_cx) (global.get $curve_add_tmp_pp))
+      (call $u256_sub (global.get $curve_tmp_cx) (global.get $field) (global.get $curve_tmp_cx))
+      (call $field_add (global.get $curve_tmp_cx) (global.get $curve_add_tmp_pp))
 
       (memory.copy (global.get $curve_tmp_cy) (global.get $curve_add_tmp_mm) (i32.const 32))
-      (call $coef_add (global.get $curve_tmp_cy) (global.get $curve_add_tmp_pp))
+      (call $field_add (global.get $curve_tmp_cy) (global.get $curve_add_tmp_pp))
 
       (memory.copy (global.get $curve_tmp_cz) (global.get $curve_add_tmp_tt2d) (i32.const 32))
-      (call $coef_add (global.get $curve_tmp_cz) (global.get $curve_add_tmp_zz2))
+      (call $field_add (global.get $curve_tmp_cz) (global.get $curve_add_tmp_zz2))
 
       (memory.copy (global.get $curve_tmp_ct) (global.get $curve_add_tmp_tt2d) (i32.const 32))
-      (call $u256_sub (global.get $curve_tmp_ct) (global.get $coef) (global.get $curve_tmp_ct))
-      (call $coef_add (global.get $curve_tmp_ct) (global.get $curve_add_tmp_zz2))
+      (call $u256_sub (global.get $curve_tmp_ct) (global.get $field) (global.get $curve_tmp_ct))
+      (call $field_add (global.get $curve_tmp_ct) (global.get $curve_add_tmp_zz2))
 
       (memory.copy (local.get $ax) (global.get $curve_tmp_cx) (i32.const 96))
       (memory.copy (local.get $at) (global.get $curve_tmp_cx) (i32.const 32))
-      (call $coef_mul (local.get $ax) (global.get $curve_tmp_ct))
-      (call $coef_mul (local.get $ay) (global.get $curve_tmp_cz))
-      (call $coef_mul (local.get $az) (global.get $curve_tmp_ct))
-      (call $coef_mul (local.get $at) (global.get $curve_tmp_cy))
+      (call $field_mul (local.get $ax) (global.get $curve_tmp_ct))
+      (call $field_mul (local.get $ay) (global.get $curve_tmp_cz))
+      (call $field_mul (local.get $az) (global.get $curve_tmp_ct))
+      (call $field_mul (local.get $at) (global.get $curve_tmp_cy))
     )
 
     (func $curve_pow (param $o i32) (param $x i32) (param $e i32)
@@ -930,7 +929,7 @@
         (i32.const 0) (i32.const 0)
         (global.get $sign_tmp_k) (i32.const 64)
       )
-      (call $u512_mod_exp (global.get $sign_tmp_k))
+      (call $u512_mod_scalar (global.get $sign_tmp_k))
 
       (call $curve_pow (global.get $sign_tmp_r) (global.get $rist_basepoint) (global.get $sign_tmp_k))
       (call $rist_encode (local.get $r) (global.get $sign_tmp_r))
@@ -944,10 +943,10 @@
         (global.get $str_sign_c_adr) (global.get $str_sign_c_len)
         (global.get $sign_tmp_e) (i32.const 64)
       )
-      (call $u512_mod_exp (global.get $sign_tmp_e))
+      (call $u512_mod_scalar (global.get $sign_tmp_e))
       (memory.copy (local.get $s) (global.get $sign_tmp_e) (i32.const 32))
-      (call $exp_mul (local.get $s) (local.get $key_adr))
-      (call $exp_add (local.get $s) (global.get $sign_tmp_k))
+      (call $scalar_mul (local.get $s) (local.get $key_adr))
+      (call $scalar_add (local.get $s) (global.get $sign_tmp_k))
 
       (i32.store8 offset=63 (local.get $r) (i32.or (i32.load8_u offset=63 (local.get $r)) (i32.const 128)))
       (memory.fill (global.get $sign_tmp_k) (i32.const 0) (i32.const 1280))

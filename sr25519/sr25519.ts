@@ -11,9 +11,9 @@ export const { sign } = instantiate()
 export function instantiate() {
   const u512 = 1n << 512n
   const u256 = 1n << 256n
-  const coef = (1n << 255n) - 19n
-  const exp = (1n << 252n) + 27742317777372353535851937790883648493n
-  const coefI = 19681161376707505956807079304988542015446066515923890162744021073123829784752n
+  const field = (1n << 255n) - 19n
+  const scalar = (1n << 252n) + 27742317777372353535851937790883648493n
+  const fieldI = 19681161376707505956807079304988542015446066515923890162744021073123829784752n
   const ristD = 37095705934669439343138083508754565189542113879843219016388785533085940283555n
 
   const memory = new WebAssembly.Memory({ initial: 10, maximum: 128 })
@@ -33,17 +33,17 @@ export function instantiate() {
 
   interface Wasm {
     keccak_rc_adr: WebAssembly.Global
-    coef: WebAssembly.Global
-    exp: WebAssembly.Global
-    neg_coef: WebAssembly.Global
-    neg_exp: WebAssembly.Global
-    u256_mod_exp: WebAssembly.Global
-    coef_neg_two: WebAssembly.Global
+    field: WebAssembly.Global
+    scalar: WebAssembly.Global
+    neg_field: WebAssembly.Global
+    neg_scalar: WebAssembly.Global
+    u256_mod_scalar: WebAssembly.Global
+    field_neg_two: WebAssembly.Global
     rist_d: WebAssembly.Global
-    coef_invsqrt_pow: WebAssembly.Global
-    coef_i: WebAssembly.Global
-    coef_neg_i: WebAssembly.Global
-    coef_neg_one: WebAssembly.Global
+    field_invsqrt_pow: WebAssembly.Global
+    field_i: WebAssembly.Global
+    field_neg_i: WebAssembly.Global
+    field_neg_one: WebAssembly.Global
     rist_inv_root_a_sub_d: WebAssembly.Global
     curve_a: WebAssembly.Global
     rist_2d: WebAssembly.Global
@@ -57,11 +57,11 @@ export function instantiate() {
     u256_sub(o: number, x: number, y: number): number
     u256_mod_neg(x: number, y: number): number
     _u256_mul_u512(o: number, x: number, y: number): void
-    coef_add(o: number, x: number): void
-    coef_mul(x: number, y: number): void
-    exp_add(o: number, x: number): void
-    exp_mul(x: number, y: number): void
-    coef_invsqrt(o: number): number
+    field_add(o: number, x: number): void
+    field_mul(x: number, y: number): void
+    scalar_add(o: number, x: number): void
+    scalar_mul(x: number, y: number): void
+    field_invsqrt(o: number): number
 
     rist_decode(o: number, s: number): number
     rist_encode(o: number, x: number): number
@@ -117,16 +117,16 @@ export function instantiate() {
     wasm.keccak_rc_adr.value,
   )
 
-  writeU256(wasm.coef.value, coef)
-  writeU256(wasm.exp.value, exp)
-  writeU256(wasm.neg_coef.value, u256 - coef)
-  writeU256(wasm.neg_exp.value, u256 - exp)
-  writeU256(wasm.u256_mod_exp.value, u256 % exp)
-  writeU256(wasm.coef_neg_two.value, coef - 2n)
-  writeU256(wasm.coef_invsqrt_pow.value, 3n + 7n * (coef - 5n) / 8n)
-  writeU256(wasm.coef_i.value, coefI)
-  writeU256(wasm.coef_neg_i.value, coef - coefI)
-  writeU256(wasm.coef_neg_one.value, coef - 1n)
+  writeU256(wasm.field.value, field)
+  writeU256(wasm.scalar.value, scalar)
+  writeU256(wasm.neg_field.value, u256 - field)
+  writeU256(wasm.neg_scalar.value, u256 - scalar)
+  writeU256(wasm.u256_mod_scalar.value, u256 % scalar)
+  writeU256(wasm.field_neg_two.value, field - 2n)
+  writeU256(wasm.field_invsqrt_pow.value, 3n + 7n * (field - 5n) / 8n)
+  writeU256(wasm.field_i.value, fieldI)
+  writeU256(wasm.field_neg_i.value, field - fieldI)
+  writeU256(wasm.field_neg_one.value, field - 1n)
   writeU256(
     wasm.rist_inv_root_a_sub_d.value,
     54469307008909316920995813868745141605393597292927456921205312896311721017578n,
@@ -188,5 +188,5 @@ export function instantiate() {
     mem.subarray(adr, adr + 32).set($u256.encode(value))
   }
 
-  return { readU256, writeU256, wasm, mem, u256, u512, coef, exp, ristD, coefI, sign }
+  return { readU256, writeU256, wasm, mem, u256, u512, field, scalar, ristD, fieldI, sign }
 }
