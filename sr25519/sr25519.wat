@@ -1,5 +1,9 @@
 (module
-  (import "sr25519" "memory" (memory 1))
+  (import "host" "memory" (memory 1))
+  (import "keccak" "keccak_f1600" (func $keccak_f1600 (param i32)))
+
+
+  ;; mem-start: 192
 
   ;; (import "log" "u32" (func $log_u32 (param i32)))
   ;; (import "log" "u64" (func $log_u64 (param i64)))
@@ -10,11 +14,6 @@
   ;; (func $dbg_u64 (param $v i64) (result i64) local.get $v call $log_u64 local.get $v)
   ;; (func $dbg_i32 (param $v i32) (result i32) local.get $v call $log_i32 local.get $v)
   ;; (func $dbg_i64 (param $v i64) (result i64) local.get $v call $log_i64 local.get $v)
-
-  ;; 192 bytes
-  (export "keccak_rc_adr" (global $keccak_rc_adr))
-  (global $keccak_rc_adr i32 (i32.const 0))
-  (global $keccak_rc_end i32 (i32.const 192))
 
   ;; 32 bytes
   (export "coef" (global $coef))
@@ -225,120 +224,6 @@
 
   (global (export "free_adr") i32 (i32.const 4000))
 
-  (func $_keccak_0 (param $adr i32) (result i32) (result i64)
-    (i32.add (local.get $adr) (i32.const 8))
-    (i64.load offset=0 (local.get $adr))
-    (i64.xor (i64.load offset=40 (local.get $adr)))
-    (i64.xor (i64.load offset=80 (local.get $adr)))
-    (i64.xor (i64.load offset=120 (local.get $adr)))
-    (i64.xor (i64.load offset=160 (local.get $adr)))
-  )
-
-  (func $_keccak_1 (param $adr i32) (param $n i64) (result i32)
-    (i32.add (local.get $adr) (i32.const 8))
-    (i64.store offset=0 (local.get $adr) (i64.load offset=0 (local.get $adr)) (i64.xor (local.get $n)))
-    (i64.store offset=40 (local.get $adr) (i64.load offset=40 (local.get $adr)) (i64.xor (local.get $n)))
-    (i64.store offset=80 (local.get $adr) (i64.load offset=80 (local.get $adr)) (i64.xor (local.get $n)))
-    (i64.store offset=120 (local.get $adr) (i64.load offset=120 (local.get $adr)) (i64.xor (local.get $n)))
-    (i64.store offset=160 (local.get $adr) (i64.load offset=160 (local.get $adr)) (i64.xor (local.get $n)))
-  )
-
-  (func $_keccak_2 (param $adr i32) (param $v i64) (param $n i32) (param $l i64) (result i32) (result i64)
-    (local.get $adr)
-    (i64.load (local.tee $adr (i32.add (local.get $adr) (local.get $n))))
-    (i64.store (local.get $adr) (i64.rotl (local.get $v) (local.get $l)))
-  )
-
-  (func $_keccak_3 (param $adr i32) (result i32)
-    (local $x0 i64)
-    (local $x1 i64)
-    (local $x2 i64)
-    (local $x3 i64)
-    (local $x4 i64)
-
-    (i32.add (local.get $adr) (i32.const 40))
-    (local.set $x0 (i64.load offset=0 (local.get $adr)))
-    (local.set $x1 (i64.load offset=8 (local.get $adr)))
-    (local.set $x2 (i64.load offset=16 (local.get $adr)))
-    (local.set $x3 (i64.load offset=24 (local.get $adr)))
-    (local.set $x4 (i64.load offset=32 (local.get $adr)))
-    (i64.store offset=0 (local.get $adr) (local.get $x0) (i64.xor (i64.and (local.get $x2) (i64.xor (local.get $x1) (i64.const -1)))))
-    (i64.store offset=8 (local.get $adr) (local.get $x1) (i64.xor (i64.and (local.get $x3) (i64.xor (local.get $x2) (i64.const -1)))))
-    (i64.store offset=16 (local.get $adr) (local.get $x2) (i64.xor (i64.and (local.get $x4) (i64.xor (local.get $x3) (i64.const -1)))))
-    (i64.store offset=24 (local.get $adr) (local.get $x3) (i64.xor (i64.and (local.get $x0) (i64.xor (local.get $x4) (i64.const -1)))))
-    (i64.store offset=32 (local.get $adr) (local.get $x4) (i64.xor (i64.and (local.get $x1) (i64.xor (local.get $x0) (i64.const -1)))))
-  )
-
-  (export "keccak_f1600" (func $keccak_f1600))
-  (func $keccak_f1600 (param $adr i32)
-    (local $rc_adr i32)
-    (local $x0 i64)
-    (local $x1 i64)
-    (local $x2 i64)
-    (local $x3 i64)
-    (local $x4 i64)
-    (local $n i64)
-
-    (local.set $rc_adr (global.get $keccak_rc_adr))
-
-    (loop $rc
-      (local.get $adr)
-      (local.set $x0 (call $_keccak_0))
-      (local.set $x1 (call $_keccak_0))
-      (local.set $x2 (call $_keccak_0))
-      (local.set $x3 (call $_keccak_0))
-      (local.set $x4 (call $_keccak_0))
-      (drop)
-
-      (local.get $adr)
-      (call $_keccak_1 (local.get $x4) (i64.xor (i64.rotl (local.get $x1) (i64.const 1))))
-      (call $_keccak_1 (local.get $x0) (i64.xor (i64.rotl (local.get $x2) (i64.const 1))))
-      (call $_keccak_1 (local.get $x1) (i64.xor (i64.rotl (local.get $x3) (i64.const 1))))
-      (call $_keccak_1 (local.get $x2) (i64.xor (i64.rotl (local.get $x4) (i64.const 1))))
-      (call $_keccak_1 (local.get $x3) (i64.xor (i64.rotl (local.get $x0) (i64.const 1))))
-      (drop)
-
-      (local.get $adr) (i64.load offset=8 (local.get $adr))
-      (call $_keccak_2 (i32.const 80) (i64.const 1))
-      (call $_keccak_2 (i32.const 56) (i64.const 3))
-      (call $_keccak_2 (i32.const 88) (i64.const 6))
-      (call $_keccak_2 (i32.const 136) (i64.const 10))
-      (call $_keccak_2 (i32.const 144) (i64.const 15))
-      (call $_keccak_2 (i32.const 24) (i64.const 21))
-      (call $_keccak_2 (i32.const 40) (i64.const 28))
-      (call $_keccak_2 (i32.const 128) (i64.const 36))
-      (call $_keccak_2 (i32.const 64) (i64.const 45))
-      (call $_keccak_2 (i32.const 168) (i64.const 55))
-      (call $_keccak_2 (i32.const 192) (i64.const 2))
-      (call $_keccak_2 (i32.const 32) (i64.const 14))
-      (call $_keccak_2 (i32.const 120) (i64.const 27))
-      (call $_keccak_2 (i32.const 184) (i64.const 41))
-      (call $_keccak_2 (i32.const 152) (i64.const 56))
-      (call $_keccak_2 (i32.const 104) (i64.const 8))
-      (call $_keccak_2 (i32.const 96) (i64.const 25))
-      (call $_keccak_2 (i32.const 16) (i64.const 43))
-      (call $_keccak_2 (i32.const 160) (i64.const 62))
-      (call $_keccak_2 (i32.const 112) (i64.const 18))
-      (call $_keccak_2 (i32.const 176) (i64.const 39))
-      (call $_keccak_2 (i32.const 72) (i64.const 61))
-      (call $_keccak_2 (i32.const 48) (i64.const 20))
-      (call $_keccak_2 (i32.const 8) (i64.const 44))
-      (drop) (drop)
-
-      (local.get $adr)
-      (call $_keccak_3)
-      (call $_keccak_3)
-      (call $_keccak_3)
-      (call $_keccak_3)
-      (call $_keccak_3)
-      (drop)
-
-      (i64.store (local.get $adr) (i64.load (local.get $adr)) (i64.xor (i64.load (local.get $rc_adr))))
-      (local.tee $rc_adr (i32.add (local.get $rc_adr) (i32.const 8)))
-      (br_if $rc (i32.lt_u (global.get $keccak_rc_end)))
-    )
-  )
-
   (global $strobe_i i32 (i32.const 0x01))
   (global $strobe_a i32 (i32.const 0x02))
   (global $strobe_c i32 (i32.const 0x04))
@@ -427,81 +312,81 @@
     (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
   )
 
-    ;; <-- form.wat bug?
+  ;; <-- form.wat bug?
 
-    (global $strobe_r i32 (i32.const 166))
+  (global $strobe_r i32 (i32.const 166))
 
-    (func $strobe_absorb (param $strobe i32) (param $read_adr i32) (param $read_len i32)
-      (local $read_end i32)
-      (local $pos i32)
-      (local $adr i32)
+  (func $strobe_absorb (param $strobe i32) (param $read_adr i32) (param $read_len i32)
+    (local $read_end i32)
+    (local $pos i32)
+    (local $adr i32)
 
-      (local.set $read_end (i32.add (local.get $read_adr) (local.get $read_len)))
-      (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
+    (local.set $read_end (i32.add (local.get $read_adr) (local.get $read_len)))
+    (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
 
-      (loop $read
-        (local.tee $adr (i32.add (local.get $pos) (local.get $strobe)))
-        (i32.store8 (i32.xor (i32.load8_u (local.get $adr)) (i32.load8_u (local.get $read_adr))))
-        (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
-        (if (i32.eq (global.get $strobe_r)) (then
-          (call $strobe_run_f (local.get $strobe) (local.get $pos))
-          (local.set $pos (i32.const 0))
-        ))
-        (local.tee $read_adr (i32.add (local.get $read_adr) (i32.const 1)))
-        (br_if $read (i32.lt_u (local.get $read_end)))
-      )
-      (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
+    (loop $read
+      (local.tee $adr (i32.add (local.get $pos) (local.get $strobe)))
+      (i32.store8 (i32.xor (i32.load8_u (local.get $adr)) (i32.load8_u (local.get $read_adr))))
+      (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
+      (if (i32.eq (global.get $strobe_r)) (then
+        (call $strobe_run_f (local.get $strobe) (local.get $pos))
+        (local.set $pos (i32.const 0))
+      ))
+      (local.tee $read_adr (i32.add (local.get $read_adr) (i32.const 1)))
+      (br_if $read (i32.lt_u (local.get $read_end)))
     )
+    (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
+  )
 
-    (func $strobe_overwrite (param $strobe i32) (param $read_adr i32) (param $read_len i32)
-      (local $read_end i32)
-      (local $pos i32)
+  (func $strobe_overwrite (param $strobe i32) (param $read_adr i32) (param $read_len i32)
+    (local $read_end i32)
+    (local $pos i32)
 
-      (local.set $read_end (i32.add (local.get $read_adr) (local.get $read_len)))
-      (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
+    (local.set $read_end (i32.add (local.get $read_adr) (local.get $read_len)))
+    (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
 
-      (loop $read
-        (i32.store8 (i32.add (local.get $pos) (local.get $strobe)) (i32.load8_u (local.get $read_adr)))
-        (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
-        (if (i32.eq (global.get $strobe_r)) (then
-          (call $strobe_run_f (local.get $strobe) (local.get $pos))
-          (local.set $pos (i32.const 0))
-        ))
-        (local.tee $read_adr (i32.add (local.get $read_adr) (i32.const 1)))
-        (br_if $read (i32.lt_u (local.get $read_end)))
-      )
-      (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
+    (loop $read
+      (i32.store8 (i32.add (local.get $pos) (local.get $strobe)) (i32.load8_u (local.get $read_adr)))
+      (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
+      (if (i32.eq (global.get $strobe_r)) (then
+        (call $strobe_run_f (local.get $strobe) (local.get $pos))
+        (local.set $pos (i32.const 0))
+      ))
+      (local.tee $read_adr (i32.add (local.get $read_adr) (i32.const 1)))
+      (br_if $read (i32.lt_u (local.get $read_end)))
     )
+    (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
+  )
 
-    (func $strobe_squeeze (param $strobe i32) (param $write_adr i32) (param $write_len i32)
-      (local $write_end i32)
-      (local $pos i32)
+  (func $strobe_squeeze (param $strobe i32) (param $write_adr i32) (param $write_len i32)
+    (local $write_end i32)
+    (local $pos i32)
 
-      (local.set $write_end (i32.add (local.get $write_adr) (local.get $write_len)))
-      (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
+    (local.set $write_end (i32.add (local.get $write_adr) (local.get $write_len)))
+    (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
 
-      (loop $read
-        (i32.store8 (local.get $write_adr) (i32.load8_u (i32.add (local.get $pos) (local.get $strobe))))
-        (i32.store8 (i32.add (local.get $pos) (local.get $strobe)) (i32.const 0))
-        (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
-        (if (i32.eq (global.get $strobe_r)) (then
-          (call $strobe_run_f (local.get $strobe) (local.get $pos))
-          (local.set $pos (i32.const 0))
-        ))
-        (local.tee $write_adr (i32.add (local.get $write_adr) (i32.const 1)))
-        (br_if $read (i32.lt_u (local.get $write_end)))
-      )
-      (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
+    (loop $read
+      (i32.store8 (local.get $write_adr) (i32.load8_u (i32.add (local.get $pos) (local.get $strobe))))
+      (i32.store8 (i32.add (local.get $pos) (local.get $strobe)) (i32.const 0))
+      (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
+      (if (i32.eq (global.get $strobe_r)) (then
+        (call $strobe_run_f (local.get $strobe) (local.get $pos))
+        (local.set $pos (i32.const 0))
+      ))
+      (local.tee $write_adr (i32.add (local.get $write_adr) (i32.const 1)))
+      (br_if $read (i32.lt_u (local.get $write_end)))
     )
+    (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
+  )
 
-    (func $strobe_run_f (param $strobe i32) (param $pos i32)
-      (local $adr i32)
-      (local.tee $adr (i32.add (local.get $strobe) (local.get $pos)))
-      (i32.store16 (i32.xor (i32.load16_u (local.get $adr)) (i32.or (i32.load16_u offset=201 (local.get $strobe)) (i32.const 0x0400))))
-      (i32.store8 offset=167 (local.get $strobe) (i32.xor (i32.load8_u offset=167 (local.get $strobe)) (i32.const 0x80)))
-      (call $keccak_f1600 (local.get $strobe))
-      (i32.store16 offset=200 (local.get $strobe) (i32.const 0))
-    )
+  (func $strobe_run_f (param $strobe i32) (param $pos i32)
+    (local $adr i32)
+    (local.tee $adr (i32.add (local.get $strobe) (local.get $pos)))
+    (i32.store16 (i32.xor (i32.load16_u (local.get $adr)) (i32.or (i32.load16_u offset=201 (local.get $strobe)) (i32.const 0x0400))))
+    (i32.store8 offset=167 (local.get $strobe) (i32.xor (i32.load8_u offset=167 (local.get $strobe)) (i32.const 0x80)))
+    (call $keccak_f1600 (local.get $strobe))
+    (i32.store16 offset=200 (local.get $strobe) (i32.const 0))
+  )
 
     (func $_u256_add_0
       (param $o i32) (param $s i64) (param $x i32) (param $n i64)
@@ -689,32 +574,23 @@
       (memory.fill (global.get $exp_mul_tmp) (i32.const 0) (i32.const 64))
     )
 
-    (table $fns 4 funcref)
+    (table $fns 2 funcref)
     (elem (i32.const 0)
       $coef_mul
-      $coef_sqr
       $curve_add
-      $curve_dbl
     )
 
     ;; <T> x: &T, y: &T
     ;; *x *= *y
     (type $mul_fn (func (param i32) (param i32)))
-    ;; <T> x: &T
-    ;; *x *= *x
-    (type $sqr_fn (func (param i32)))
-
-    (func $coef_sqr (param $x i32)
-      (call $coef_mul (local.get $x) (local.get $x))
-    )
 
     ;; <T> o: &T; x: &T; e: u32; f: &mul_fn<T>
     ;; *o = *o^u32 * (*x)^e
-    (func $pow_u32 (param $o i32) (param $x i32) (param $e i32) (param $mul i32) (param $sqr i32)
+    (func $pow_u32 (param $o i32) (param $x i32) (param $e i32) (param $mul i32)
       (local $m i32)
       (local.set $m (i32.const 0x80000000))
       (loop $m
-        (call_indirect $fns (type $sqr_fn) (local.get $o) (local.get $sqr))
+        (call_indirect $fns (type $mul_fn) (local.get $o) (local.get $o) (local.get $mul))
         (if (i32.and (local.get $e) (local.get $m)) (then
           (call_indirect $fns (type $mul_fn) (local.get $o) (local.get $x) (local.get $mul))
         ))
@@ -724,11 +600,11 @@
 
     ;; <T> o: &T; x: &T; e: &u256; f: &mul_fn<T>
     ;; *o = *o^(u256) * (*x)^(*e)
-    (func $pow (param $o i32) (param $x i32) (param $e i32) (param $mul i32) (param $sqr i32)
+    (func $pow (param $o i32) (param $x i32) (param $e i32) (param $mul i32)
       (local $m i32)
       (local.set $m (i32.add (local.get $e) (i32.const 28)))
       (loop $m
-        (call $pow_u32 (local.get $o) (local.get $x) (i32.load (local.get $m)) (local.get $mul) (local.get $sqr))
+        (call $pow_u32 (local.get $o) (local.get $x) (i32.load (local.get $m)) (local.get $mul))
         (local.tee $m (i32.sub (local.get $m) (i32.const 4)))
         (br_if $m (i32.ge_u (local.get $e)))
       )
@@ -755,10 +631,10 @@
       (local $n i32)
 
       (memory.copy (global.get $coef_invsqrt_tmp_r) (global.get $one) (i32.const 32))
-      (call $pow (global.get $coef_invsqrt_tmp_r) (local.get $x) (global.get $coef_invsqrt_pow) (i32.const 0) (i32.const 1))
+      (call $pow (global.get $coef_invsqrt_tmp_r) (local.get $x) (global.get $coef_invsqrt_pow) (i32.const 0))
 
       (memory.copy (global.get $coef_invsqrt_tmp_c) (global.get $coef_invsqrt_tmp_r) (i32.const 32))
-      (call $coef_sqr (global.get $coef_invsqrt_tmp_c))
+      (call $coef_mul (global.get $coef_invsqrt_tmp_c) (global.get $coef_invsqrt_tmp_c))
       (call $coef_mul (global.get $coef_invsqrt_tmp_c) (local.get $x))
 
       (if (i32.or
@@ -796,14 +672,14 @@
       ))
 
       (memory.copy (global.get $rist_code_tmp_u1) (local.get $s) (i32.const 32)) ;; u1 = s
-      (call $coef_sqr (global.get $rist_code_tmp_u1)) ;; u1 = s^2
+      (call $coef_mul (global.get $rist_code_tmp_u1) (global.get $rist_code_tmp_u1)) ;; u1 = s^2
       (memory.copy (global.get $rist_code_tmp_u2) (global.get $rist_code_tmp_u1) (i32.const 32)) ;; u2 = s^2
       (call $u256_sub (global.get $rist_code_tmp_u1) (global.get $coef) (global.get $rist_code_tmp_u1)) ;; u1 = -s^2
       (call $coef_add (global.get $rist_code_tmp_u1) (global.get $one)) ;; u1 = 1 - s^2
       (call $coef_add (global.get $rist_code_tmp_u2) (global.get $one)) ;; u2 = 1 + s^2
 
       (memory.copy (global.get $rist_code_tmp_u2_2) (global.get $rist_code_tmp_u2) (i32.const 32)) ;; u2_2 = u2
-      (call $coef_sqr (global.get $rist_code_tmp_u2_2)) ;; u2_2 = u2^2
+      (call $coef_mul (global.get $rist_code_tmp_u2_2) (global.get $rist_code_tmp_u2_2)) ;; u2_2 = u2^2
 
       (memory.copy (global.get $rist_code_tmp_v) (global.get $rist_d) (i32.const 32)) ;; v = d
       (call $coef_mul (global.get $rist_code_tmp_v) (global.get $rist_code_tmp_u1)) ;; v = d u1
@@ -878,7 +754,7 @@
       (call $coef_mul (global.get $rist_code_tmp_u2) (local.get $y)) ;; u2 = x y
 
       (memory.copy (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_u2) (i32.const 32)) ;; i = u2
-      (call $coef_sqr (global.get $rist_code_tmp_i)) ;; i = u2^2
+      (call $coef_mul (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_i)) ;; i = u2^2
       (call $coef_mul (global.get $rist_code_tmp_i) (global.get $rist_code_tmp_u1)) ;; i = u1 u2^2
       (drop (call $coef_invsqrt (global.get $rist_code_tmp_i))) ;; i = invsqrt(u1 u2^2)
 
@@ -925,47 +801,6 @@
       ;; s = |(z - dy)d|
 
       (memory.copy (local.get $o) (global.get $rist_code_tmp_dy) (i32.const 32))
-    )
-
-    (export "curve_dbl" (func $curve_dbl))
-    (func $curve_dbl (param $x i32)
-      (local $y i32) (local $z i32) (local $t i32)
-
-      (local.set $y (i32.add (local.get $x) (i32.const 32)))
-      (local.set $z (i32.add (local.get $x) (i32.const 64)))
-      (local.set $t (i32.add (local.get $x) (i32.const 96)))
-
-      (memory.copy (global.get $curve_dbl_tmp_x_2) (local.get $x) (i32.const 96))
-      (call $coef_sqr (global.get $curve_dbl_tmp_x_2))
-      (call $coef_sqr (global.get $curve_dbl_tmp_y_2))
-      (call $coef_sqr (global.get $curve_dbl_tmp_2z_2))
-      (call $coef_mul (global.get $curve_dbl_tmp_2z_2) (global.get $two))
-
-      (memory.copy (global.get $curve_dbl_tmp_x_y_2) (local.get $x) (i32.const 32))
-      (call $coef_add (global.get $curve_dbl_tmp_x_y_2) (local.get $y))
-      (call $coef_sqr (global.get $curve_dbl_tmp_x_y_2))
-
-      (memory.copy (global.get $curve_tmp_cy) (global.get $curve_dbl_tmp_x_2) (i32.const 32))
-      (call $coef_add (global.get $curve_tmp_cy) (global.get $curve_dbl_tmp_y_2))
-
-      (memory.copy (global.get $curve_tmp_cz) (global.get $curve_dbl_tmp_x_2) (i32.const 32))
-      (call $u256_sub (global.get $curve_tmp_cz) (global.get $coef) (global.get $curve_tmp_cz))
-      (call $coef_add (global.get $curve_tmp_cz) (global.get $curve_dbl_tmp_y_2))
-
-      (memory.copy (global.get $curve_tmp_cx) (global.get $curve_tmp_cy) (i32.const 32))
-      (call $u256_sub (global.get $curve_tmp_cx) (global.get $coef) (global.get $curve_tmp_cx))
-      (call $coef_add (global.get $curve_tmp_cx) (global.get $curve_dbl_tmp_x_y_2))
-
-      (memory.copy (global.get $curve_tmp_ct) (global.get $curve_tmp_cz) (i32.const 32))
-      (call $u256_sub (global.get $curve_tmp_ct) (global.get $coef) (global.get $curve_tmp_ct))
-      (call $coef_add (global.get $curve_tmp_ct) (global.get $curve_dbl_tmp_2z_2))
-
-      (memory.copy (local.get $x) (global.get $curve_tmp_cx) (i32.const 96))
-      (memory.copy (local.get $t) (global.get $curve_tmp_cx) (i32.const 32))
-      (call $coef_mul (local.get $x) (global.get $curve_tmp_ct))
-      (call $coef_mul (local.get $y) (global.get $curve_tmp_cz))
-      (call $coef_mul (local.get $z) (global.get $curve_tmp_ct))
-      (call $coef_mul (local.get $t) (global.get $curve_tmp_cy))
     )
 
     (export "curve_add" (func $curve_add))
@@ -1027,7 +862,7 @@
 
     (func $curve_pow (param $o i32) (param $x i32) (param $e i32)
       (memory.copy (local.get $o) (global.get $rist_zero) (i32.const 128))
-      (call $pow (local.get $o) (local.get $x) (local.get $e) (i32.const 2) (i32.const 3))
+      (call $pow (local.get $o) (local.get $x) (local.get $e) (i32.const 1))
     )
 
     (data $strobe_init_data "\01\a8\01\00\01\60STROBEv1.0.2")

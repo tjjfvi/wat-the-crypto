@@ -78,30 +78,6 @@ Deno.test("rist decode encode", () => {
   }
 })
 
-const doublings = [
-  [cases[0]![0], cases[0]![0]],
-  [cases[1]![0], cases[2]![0]],
-  [cases[2]![0], cases[4]![0]],
-  [cases[3]![0], cases[6]![0]],
-  [cases[4]![0], cases[8]![0]],
-] as const
-
-Deno.test("rist double", () => {
-  for (const [a, b] of doublings) {
-    mem.set(
-      decodeHex(a),
-      wasm.free_adr.value,
-    )
-    wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
-    wasm.curve_dbl(wasm.free_adr.value + 32)
-    wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
-    assertEquals(
-      encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)),
-      b,
-    )
-  }
-})
-
 const adds = [
   [cases[0]![0], cases[0]![0], cases[0]![0]],
   [cases[0]![0], cases[1]![0], cases[1]![0]],

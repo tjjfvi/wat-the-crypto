@@ -9,6 +9,7 @@ const wasmPaths = [
   "xxhash/xxhash",
   "blake2b/blake2b",
   "sr25519/sr25519",
+  "sr25519/keccak",
 ]
 
 let success = true

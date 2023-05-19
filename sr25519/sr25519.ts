@@ -1,9 +1,10 @@
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
 import { u256 as $u256 } from "https://deno.land/x/scale@v0.11.2/codecs/int.ts"
 // import { log } from "../common/log.ts"
-import wasmCode from "./sr25519.wasm.ts"
+import keccakCode from "./keccak.wasm.ts"
+import sr25519Code from "./sr25519.wasm.ts"
 
-console.log(wasmCode.length, "bytes of wasm")
+console.log(sr25519Code.length, "bytes of wasm")
 
 export const { sign } = instantiate()
 
@@ -17,13 +18,20 @@ export function instantiate() {
 
   const memory = new WebAssembly.Memory({ initial: 10, maximum: 128 })
 
-  const wasmModule = new WebAssembly.Module(wasmCode)
-  const wasmInstance = new WebAssembly.Instance(wasmModule, {
-    sr25519: { memory },
+  const keccakModule = new WebAssembly.Module(keccakCode)
+  const keccakInstance = new WebAssembly.Instance(keccakModule, {
+    host: { memory },
     // log,
   })
 
-  interface Sr25519Wasm {
+  const sr25519Module = new WebAssembly.Module(sr25519Code)
+  const sr25519Instance = new WebAssembly.Instance(sr25519Module, {
+    host: { memory },
+    keccak: keccakInstance.exports,
+    // log,
+  })
+
+  interface Wasm {
     keccak_rc_adr: WebAssembly.Global
     coef: WebAssembly.Global
     exp: WebAssembly.Global
@@ -71,7 +79,10 @@ export function instantiate() {
     ): void
   }
 
-  const wasm = wasmInstance.exports as never as Sr25519Wasm
+  const wasm = {
+    ...keccakInstance.exports,
+    ...sr25519Instance.exports,
+  } as never as Wasm
   const mem = new Uint8Array(memory.buffer)
 
   mem.set(
