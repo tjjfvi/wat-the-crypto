@@ -1,15 +1,15 @@
 (module
   (import "sr25519" "memory" (memory 1))
 
-  (import "log" "u32" (func $log_u32 (param i32)))
-  (import "log" "u64" (func $log_u64 (param i64)))
-  (import "log" "i32" (func $log_i32 (param i32)))
-  (import "log" "i64" (func $log_i64 (param i64)))
-  (import "log" "brk" (func $log_brk))
-  (func $dbg_u32 (param $v i32) (result i32) local.get $v call $log_u32 local.get $v)
-  (func $dbg_u64 (param $v i64) (result i64) local.get $v call $log_u64 local.get $v)
-  (func $dbg_i32 (param $v i32) (result i32) local.get $v call $log_i32 local.get $v)
-  (func $dbg_i64 (param $v i64) (result i64) local.get $v call $log_i64 local.get $v)
+  ;; (import "log" "u32" (func $log_u32 (param i32)))
+  ;; (import "log" "u64" (func $log_u64 (param i64)))
+  ;; (import "log" "i32" (func $log_i32 (param i32)))
+  ;; (import "log" "i64" (func $log_i64 (param i64)))
+  ;; (import "log" "brk" (func $log_brk))
+  ;; (func $dbg_u32 (param $v i32) (result i32) local.get $v call $log_u32 local.get $v)
+  ;; (func $dbg_u64 (param $v i64) (result i64) local.get $v call $log_u64 local.get $v)
+  ;; (func $dbg_i32 (param $v i32) (result i32) local.get $v call $log_i32 local.get $v)
+  ;; (func $dbg_i64 (param $v i64) (result i64) local.get $v call $log_i64 local.get $v)
 
   ;; 192 bytes
   (export "keccak_rc_adr" (global $keccak_rc_adr))
