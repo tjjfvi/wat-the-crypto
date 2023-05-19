@@ -1,3 +1,4 @@
+import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
 import { u256 as $u256 } from "https://deno.land/x/scale@v0.11.2/codecs/int.ts"
 import { log } from "../common/log.ts"
 import wasmCode from "./sr25519.wasm.ts"
@@ -35,6 +36,8 @@ interface Sr25519Wasm {
   rist_inv_root_a_sub_d: WebAssembly.Global
   curve_a: WebAssembly.Global
   rist_2d: WebAssembly.Global
+  rist_basepoint: WebAssembly.Global
+  rist_zero: WebAssembly.Global
   free_adr: WebAssembly.Global
 
   keccak_f1600(adr: number): void
@@ -55,6 +58,15 @@ interface Sr25519Wasm {
 
   curve_dbl(x: number): void
   curve_add(x: number, y: number): void
+
+  sign(
+    msg_adr: number,
+    msg_len: number,
+    pub_adr: number,
+    key_adr: number,
+    rng_adr: number,
+    sig_adr: number,
+  ): void
 }
 
 export const wasm = wasmInstance.exports as never as Sr25519Wasm
@@ -109,6 +121,51 @@ writeU256(
 writeU256(wasm.rist_d.value, ristD)
 writeU256(wasm.curve_a.value, 486662n)
 writeU256(wasm.rist_2d.value, 2n * ristD)
+writeU256(
+  wasm.rist_basepoint.value,
+  7413488746097234319268533557746747958297143720389000677696299943083562100178n,
+)
+writeU256(
+  wasm.rist_basepoint.value + 32,
+  9771384041963202563870679428059935816164187996444183106833894008023910952347n,
+)
+writeU256(wasm.rist_basepoint.value + 64, 1n)
+writeU256(
+  wasm.rist_basepoint.value + 96,
+  11068640767834918466713275874066756361490786778694627043054626174422747718218n,
+)
+writeU256(wasm.rist_zero.value + 32, 1n)
+writeU256(wasm.rist_zero.value + 64, 1n)
+
+export function sign(
+  secret: Uint8Array,
+  pubkey: Uint8Array,
+  msg: Uint8Array,
+  rand = crypto.getRandomValues(new Uint8Array(32)),
+) {
+  assertEquals(secret.length, 64)
+  assertEquals(pubkey.length, 32)
+  const secretAdr = wasm.free_adr.value
+  const pubkeyAdr = secretAdr + 64
+  const randAdr = pubkeyAdr + 32
+  const sigAdr = randAdr + 32
+  const msgAdr = sigAdr + 64
+  mem.set(secret, secretAdr)
+  mem.set(pubkey, pubkeyAdr)
+  mem.set(msg, msgAdr)
+  mem.set(rand, randAdr)
+  wasm.sign(
+    msgAdr,
+    msg.length,
+    pubkeyAdr,
+    secretAdr,
+    randAdr,
+    sigAdr,
+  )
+  const sig = mem.slice(sigAdr, sigAdr + 64)
+  mem.fill(0, secretAdr, msgAdr + msg.length - secretAdr)
+  return sig
+}
 
 export function readU256(adr: number) {
   return $u256.decode(mem.subarray(adr, adr + 32))

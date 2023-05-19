@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
 import { decodeHex, encodeHex } from "../common/hex.ts"
-import { mem, wasm } from "./sr25519.ts"
+import { mem, readU256, wasm } from "./sr25519.ts"
 
 const cases: [string, number?][] = [
   ["0000000000000000000000000000000000000000000000000000000000000000", 0],
@@ -69,6 +69,12 @@ for (const [hex, out] of cases) {
   }
   if (r === 0) {
     mem.set(new Uint8Array(32), wasm.free_adr.value)
+    if (hex === "0000000000000000000000000000000000000000000000000000000000000000") {
+      console.log(readU256(wasm.free_adr.value + 32))
+      console.log(readU256(wasm.free_adr.value + 32 * 2))
+      console.log(readU256(wasm.free_adr.value + 32 * 3))
+      console.log(readU256(wasm.free_adr.value + 32 * 4))
+    }
     wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
     assertEquals(encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)), hex)
   }

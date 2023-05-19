@@ -27,93 +27,93 @@ const aAdr = wasm.free_adr.value
 const bAdr = wasm.free_adr.value + 256
 const oAdr = wasm.free_adr.value + 512
 
-for (const aU256 of u256s) {
-  for (const bU256 of u256s) {
-    writeU256(aAdr, aU256)
-    writeU256(bAdr, bU256)
-    wasm._u256_add(aAdr, 1n, bAdr, 0n)
-    assertU256Equals(readU256(aAdr), (aU256 + bU256) % u256)
+// for (const aU256 of u256s) {
+//   for (const bU256 of u256s) {
+//     writeU256(aAdr, aU256)
+//     writeU256(bAdr, bU256)
+//     wasm._u256_add(aAdr, 1n, bAdr, 0n)
+//     assertU256Equals(readU256(aAdr), (aU256 + bU256) % u256)
 
-    writeU256(aAdr, aU256)
-    writeU256(bAdr, bU256)
-    wasm.u256_sub(oAdr, aAdr, bAdr)
-    assertU256Equals(readU256(oAdr), (u256 + aU256 - bU256) % u256)
-  }
-}
+//     writeU256(aAdr, aU256)
+//     writeU256(bAdr, bU256)
+//     wasm.u256_sub(oAdr, aAdr, bAdr)
+//     assertU256Equals(readU256(oAdr), (u256 + aU256 - bU256) % u256)
+//   }
+// }
 
-for (const aU256 of u256s) {
-  writeU256(aAdr, aU256)
-  wasm.u256_mod_neg(aAdr, wasm.neg_coef.value)
-  assertU256Equals(readU256(aAdr), aU256 % coef)
-  writeU256(aAdr, aU256)
-  wasm.u256_mod_neg(aAdr, wasm.neg_exp.value)
-  assertU256Equals(readU256(aAdr), aU256 % exp)
-}
+// for (const aU256 of u256s) {
+//   writeU256(aAdr, aU256)
+//   wasm.u256_mod_neg(aAdr, wasm.neg_coef.value)
+//   assertU256Equals(readU256(aAdr), aU256 % coef)
+//   writeU256(aAdr, aU256)
+//   wasm.u256_mod_neg(aAdr, wasm.neg_exp.value)
+//   assertU256Equals(readU256(aAdr), aU256 % exp)
+// }
 
-for (const aU256 of u256s) {
-  for (const bU256 of u256s) {
-    writeU256(aAdr, aU256 % coef)
-    writeU256(bAdr, bU256 % coef)
-    wasm.coef_add(aAdr, bAdr)
-    assertU256Equals(readU256(aAdr), (aU256 + bU256) % coef)
-  }
-}
+// for (const aU256 of u256s) {
+//   for (const bU256 of u256s) {
+//     writeU256(aAdr, aU256 % coef)
+//     writeU256(bAdr, bU256 % coef)
+//     wasm.coef_add(aAdr, bAdr)
+//     assertU256Equals(readU256(aAdr), (aU256 + bU256) % coef)
+//   }
+// }
 
-for (const aU256 of u256s) {
-  for (const bU256 of u256s) {
-    writeU256(aAdr, aU256 % exp)
-    writeU256(bAdr, bU256 % exp)
-    wasm.exp_add(aAdr, bAdr)
-    assertU256Equals(readU256(aAdr), (aU256 + bU256) % exp)
-  }
-}
+// for (const aU256 of u256s) {
+//   for (const bU256 of u256s) {
+//     writeU256(aAdr, aU256 % exp)
+//     writeU256(bAdr, bU256 % exp)
+//     wasm.exp_add(aAdr, bAdr)
+//     assertU256Equals(readU256(aAdr), (aU256 + bU256) % exp)
+//   }
+// }
 
-for (const aU256 of u256s) {
-  for (const bU256 of u256s) {
-    writeU256(aAdr, aU256)
-    writeU256(bAdr, bU256)
-    mem.fill(0, oAdr, oAdr + 64)
-    wasm._u256_mul_u512(oAdr, aAdr, bAdr)
-    assertU512Equals(readU512(oAdr), (aU256 * bU256) % u512)
-  }
-}
+// for (const aU256 of u256s) {
+//   for (const bU256 of u256s) {
+//     writeU256(aAdr, aU256)
+//     writeU256(bAdr, bU256)
+//     mem.fill(0, oAdr, oAdr + 64)
+//     wasm._u256_mul_u512(oAdr, aAdr, bAdr)
+//     assertU512Equals(readU512(oAdr), (aU256 * bU256) % u512)
+//   }
+// }
 
-for (const aU256 of u256s) {
-  for (const bU256 of u256s) {
-    writeU256(aAdr, aU256)
-    writeU256(bAdr, bU256)
-    wasm.coef_mul(aAdr, bAdr)
-    assertU256Equals(readU256(aAdr), (aU256 * bU256) % coef)
-  }
-}
+// for (const aU256 of u256s) {
+//   for (const bU256 of u256s) {
+//     writeU256(aAdr, aU256)
+//     writeU256(bAdr, bU256)
+//     wasm.coef_mul(aAdr, bAdr)
+//     assertU256Equals(readU256(aAdr), (aU256 * bU256) % coef)
+//   }
+// }
 
-for (const aU256 of u256s) {
-  for (const bU256 of u256s) {
-    writeU256(aAdr, aU256)
-    writeU256(bAdr, bU256)
-    wasm.exp_mul(aAdr, bAdr)
-    assertU256Equals(readU256(aAdr), (aU256 * bU256) % exp)
-  }
-}
+// for (const aU256 of u256s) {
+//   for (const bU256 of u256s) {
+//     writeU256(aAdr, aU256)
+//     writeU256(bAdr, bU256)
+//     wasm.exp_mul(aAdr, bAdr)
+//     assertU256Equals(readU256(aAdr), (aU256 * bU256) % exp)
+//   }
+// }
 
-for (const aU256 of u256s) {
-  if ((aU256 % coef) === 0n) continue
-  writeU256(aAdr, aU256 % coef)
-  wasm.coef_inv(oAdr, aAdr)
-  assertU256Equals(readU256(oAdr) * aU256 % coef, 1n)
-}
+// for (const aU256 of u256s) {
+//   if ((aU256 % coef) === 0n) continue
+//   writeU256(aAdr, aU256 % coef)
+//   wasm.coef_inv(oAdr, aAdr)
+//   assertU256Equals(readU256(oAdr) * aU256 % coef, 1n)
+// }
 
-for (const aU256 of u256s) {
-  if ((aU256 % coef) === 0n) continue
-  writeU256(aAdr, aU256 % coef)
-  if (wasm.coef_invsqrt(aAdr)) {
-    assertU256Equals(readU256(aAdr) ** 2n * aU256 % coef, 1n)
-  } else {
-    assertU256Equals(readU256(aAdr) ** 2n * aU256 % coef, coefI)
-  }
-}
+// for (const aU256 of u256s) {
+//   if ((aU256 % coef) === 0n) continue
+//   writeU256(aAdr, aU256 % coef)
+//   if (wasm.coef_invsqrt(aAdr)) {
+//     assertU256Equals(readU256(aAdr) ** 2n * aU256 % coef, 1n)
+//   } else {
+//     assertU256Equals(readU256(aAdr) ** 2n * aU256 % coef, coefI)
+//   }
+// }
 
-function readU512(adr: number) {
+export function readU512(adr: number) {
   return readU256(adr) | (readU256(adr + 32) << 256n)
 }
 

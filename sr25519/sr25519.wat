@@ -136,69 +136,94 @@
   (export "rist_2d" (global $rist_2d))
   (global $rist_2d i32 (i32.const 1600))
 
-  (global $merlin_proto_label_adr (i32.const 1632))
-  (global $merlin_proto_label_len (i32.const 11))
+  (global $merlin_proto_label_adr i32 (i32.const 1632))
+  (global $merlin_proto_label_len i32 (i32.const 11))
   (data (i32.const 1632) "Merlin v1.0")
 
   ;; 4 bytes
-  (global $merlin_len_tmp (i32.const 1643))
+  (global $merlin_len_tmp i32 (i32.const 1643))
 
   ;; 7 bytes
-  (global $str_dom_sep_adr (i32.const 1647))
-  (global $str_dom_sep_len (i32.const 7))
+  (global $str_dom_sep_adr i32 (i32.const 1647))
+  (global $str_dom_sep_len i32 (i32.const 7))
   (data (i32.const 1647) "dom-sep")
 
   ;; 14 bytes
-  (global $str_dom_sep_adr (i32.const 1654))
-  (global $str_dom_sep_len (i32.const 14))
+  (global $str_signing_context_adr i32 (i32.const 1654))
+  (global $str_signing_context_len i32 (i32.const 14))
   (data (i32.const 1654) "SigningContext")
 
   ;; 10 bytes
-  (global $str_sign_bytes_adr (i32.const 1668))
-  (global $str_dom_sep_len (i32.const 10))
+  (global $str_sign_bytes_adr i32 (i32.const 1668))
+  (global $str_sign_bytes_len i32 (i32.const 10))
   (data (i32.const 1668) "sign-bytes")
 
   ;; 10 bytes
-  (global $str_proto_name_adr (i32.const 1678))
-  (global $str_proto_name_len (i32.const 10))
-  (data (i32.const 1654) "proto-name")
+  (global $str_proto_name_adr i32 (i32.const 1678))
+  (global $str_proto_name_len i32 (i32.const 10))
+  (data (i32.const 1678) "proto-name")
 
   ;; 11 bytes
-  (global $str_schnorr_sig_adr (i32.const 1688))
-  (global $str_schnorr_sig_len (i32.const 11))
+  (global $str_schnorr_sig_adr i32 (i32.const 1688))
+  (global $str_schnorr_sig_len i32 (i32.const 11))
   (data (i32.const 1688) "Schnorr-sig")
 
-  ;; 7 bytes
-  (global $str_sign_pk_adr (i32.const 1695))
-  (global $str_sign_pk_len (i32.const 7))
-  (data (i32.const 1695) "sign:pk")
+  ;; 3 bytes gap
 
   ;; 7 bytes
-  (global $str_signing_adr (i32.const 1702))
-  (global $str_signing_len (i32.const 7))
+  (global $str_signing_adr i32 (i32.const 1702))
+  (global $str_signing_len i32 (i32.const 7))
   (data (i32.const 1702) "signing")
 
   ;; 6 bytes
-  (global $str_sign_r_adr (i32.const 1709))
-  (global $str_sign_r_len (i32.const 6))
+  (global $str_sign_r_adr i32 (i32.const 1709))
+  (global $str_sign_r_len i32 (i32.const 6))
   (data (i32.const 1709) "sign:R")
 
   ;; 6 bytes
-  (global $str_sign_c_adr (i32.const 1715))
-  (global $str_sign_c_len (i32.const 6))
+  (global $str_sign_c_adr i32 (i32.const 1715))
+  (global $str_sign_c_len i32 (i32.const 6))
   (data (i32.const 1715) "sign:c")
 
   ;; 9 bytes
-  (global $str_ctx_adr (i32.const 1721))
-  (global $str_ctx_len (i32.const 9))
+  (global $str_ctx_adr i32 (i32.const 1721))
+  (global $str_ctx_len i32 (i32.const 9))
   (data (i32.const 1721) "substrate")
 
   ;; 3 bytes
-  (global $str_rng_adr (i32.const 1730))
-  (global $str_rng_len (i32.const 3))
+  (global $str_rng_adr i32 (i32.const 1730))
+  (global $str_rng_len i32 (i32.const 3))
   (data (i32.const 1730) "rng")
 
-  (global (export "free_adr") i32 (i32.const 1733))
+  ;; 512 bytes
+  (global $sign_tmp_k i32 (i32.const 1733))
+
+  ;; 256 bytes
+  (global $sign_tmp_r i32 (i32.const 2245))
+
+  ;; 256 bytes
+  (global $sign_tmp_strobe0 i32 (i32.const 2501))
+
+  ;; 256 bytes
+  (global $sign_tmp_strobe1 i32 (i32.const 2757))
+
+  ;; 128 bytes
+  (export "rist_basepoint" (global $rist_basepoint))
+  (global $rist_basepoint i32 (i32.const 3013))
+
+  ;; 128 bytes
+  (export "rist_zero" (global $rist_zero))
+  (global $rist_zero i32 (i32.const 3141))
+
+  ;; 7 bytes
+  (global $str_sign_pk_adr i32 (i32.const 3269))
+  (global $str_sign_pk_len i32 (i32.const 7))
+  (data (i32.const 3269) "sign:pk")
+
+  ;; 512 bytes
+  (global $sign_tmp_e i32 (i32.const 3276))
+
+  (global (export "free_adr") i32 (i32.const 3788))
 
   (func $_keccak_0 (param $adr i32) (result i32) (result i64)
     (i32.add (local.get $adr) (i32.const 8))
@@ -333,8 +358,9 @@
     (param $message_len i32)
 
     (call $strobe_begin_op (local.get $strobe) (global.get $strobe_ma))
-    (call $strobe_absorb (local.get $strobe) (local.get $label_adr) (local.get $label_len))
-    (call $strobe_begin_op (local.get $strobe) (global.get $strobe_ma))
+    (if (local.get $label_len) (then
+      (call $strobe_absorb (local.get $strobe) (local.get $label_adr) (local.get $label_len))
+    ))
     (i32.store (global.get $merlin_len_tmp) (local.get $message_len))
     (call $strobe_absorb (local.get $strobe) (global.get $merlin_len_tmp) (i32.const 4))
     (call $strobe_begin_op (local.get $strobe) (global.get $strobe_a))
@@ -349,18 +375,22 @@
 
     (call $strobe_begin_op (local.get $strobe) (global.get $strobe_ma))
     (call $strobe_absorb (local.get $strobe) (local.get $label_adr) (local.get $label_len))
-    (call $strobe_begin_op (local.get $strobe) (global.get $strobe_ma))
     (i32.store (global.get $merlin_len_tmp) (local.get $witness_len))
     (call $strobe_absorb (local.get $strobe) (global.get $merlin_len_tmp) (i32.const 4))
     (call $strobe_begin_op (local.get $strobe) (global.get $strobe_ac))
     (call $strobe_overwrite (local.get $strobe) (local.get $witness_adr) (local.get $witness_len))
   )
 
-  (func $merlin_fill_bytes (param $strobe i32)
+  (func $merlin_challenge_bytes (param $strobe i32)
+    (param $label_adr i32)
+    (param $label_len i32)
     (param $dest_adr i32)
     (param $dest_len i32)
 
     (call $strobe_begin_op (local.get $strobe) (global.get $strobe_ma))
+    (if (local.get $label_len) (then
+      (call $strobe_absorb (local.get $strobe) (local.get $label_adr) (local.get $label_len))
+    ))
     (i32.store (global.get $merlin_len_tmp) (local.get $dest_len))
     (call $strobe_absorb (local.get $strobe) (global.get $merlin_len_tmp) (i32.const 4))
     (call $strobe_begin_op (local.get $strobe) (global.get $strobe_iac))
@@ -387,124 +417,150 @@
     (local.tee $adr (i32.add (local.get $pos) (local.get $strobe)))
     (i32.store8 (i32.xor (i32.load8_u (local.get $adr)) (local.get $flags)))
     (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
-    (if (i32.or (i32.and (local.get $flags) (global.get $strobe_ck)) (i32.eq (global.get $strobe_r))) (then
+    (if (i32.or
+      (i32.eq (global.get $strobe_r))
+      (i32.and (local.get $flags) (global.get $strobe_ck))
+    ) (then
       (call $strobe_run_f (local.get $strobe) (local.get $pos))
       (local.set $pos (i32.const 0))
     ))
     (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
   )
 
-  (global $strobe_r i32 (i32.const 166))
+    (global $strobe_r i32 (i32.const 166))
 
-  (func $strobe_absorb (param $strobe i32) (param $read_adr i32) (param $read_len i32)
-    (local $read_end i32)
-    (local $pos i32)
-    (local $adr i32)
+    (func $strobe_absorb (param $strobe i32) (param $read_adr i32) (param $read_len i32)
+      (local $read_end i32)
+      (local $pos i32)
+      (local $adr i32)
 
-    (local.set $read_end (i32.add (local.get $read_adr) (local.get $read_len)))
-    (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
+      (local.set $read_end (i32.add (local.get $read_adr) (local.get $read_len)))
+      (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
 
-    (loop $read
-      (local.tee $adr (i32.add (local.get $pos) (local.get $strobe)))
-      (i32.store8 (i32.xor (i32.load8_u (local.get $adr)) (i32.load8_u (local.get $read_adr))))
-      (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
-      (if (i32.eq (global.get $strobe_r)) (then
-        (call $strobe_run_f (local.get $strobe) (local.get $pos))
-        (local.set $pos (i32.const 0))
-      ))
-      (local.tee $read_adr (i32.add (local.get $read_adr) (i32.const 1)))
-      (br_if $read (i32.lt_u (local.get $read_end)))
+      (loop $read
+        (local.tee $adr (i32.add (local.get $pos) (local.get $strobe)))
+        (i32.store8 (i32.xor (i32.load8_u (local.get $adr)) (i32.load8_u (local.get $read_adr))))
+        (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
+        (if (i32.eq (global.get $strobe_r)) (then
+          (call $strobe_run_f (local.get $strobe) (local.get $pos))
+          (local.set $pos (i32.const 0))
+        ))
+        (local.tee $read_adr (i32.add (local.get $read_adr) (i32.const 1)))
+        (br_if $read (i32.lt_u (local.get $read_end)))
+      )
+      (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
     )
-    (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
-  )
 
-  (func $strobe_overwrite (param $strobe i32) (param $read_adr i32) (param $read_len i32)
-    (local $read_end i32)
-    (local $pos i32)
+    (func $strobe_overwrite (param $strobe i32) (param $read_adr i32) (param $read_len i32)
+      (local $read_end i32)
+      (local $pos i32)
 
-    (local.set $read_end (i32.add (local.get $read_adr) (local.get $read_len)))
-    (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
+      (local.set $read_end (i32.add (local.get $read_adr) (local.get $read_len)))
+      (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
 
-    (loop $read
-      (i32.store8 (i32.add (local.get $pos) (local.get $strobe)) (i32.load8_u (local.get $read_adr)))
-      (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
-      (if (i32.eq (global.get $strobe_r)) (then
-        (call $strobe_run_f (local.get $strobe) (local.get $pos))
-        (local.set $pos (i32.const 0))
-      ))
-      (local.tee $read_adr (i32.add (local.get $read_adr) (i32.const 1)))
-      (br_if $read (i32.lt_u (local.get $read_end)))
+      (call $log_brk)
+
+      (loop $read
+        (i32.store8 (i32.add (local.get $pos) (local.get $strobe)) (i32.load8_u (local.get $read_adr) (call $dbg_u32)) (call $dbg_u32))
+        (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
+        (if (i32.eq (global.get $strobe_r)) (then
+          (call $strobe_run_f (local.get $strobe) (local.get $pos))
+          (local.set $pos (i32.const 0))
+        ))
+        (local.tee $read_adr (i32.add (local.get $read_adr) (i32.const 1)))
+        (br_if $read (i32.lt_u (local.get $read_end)))
+      )
+      (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
     )
-    (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
-  )
 
-  (func $strobe_run_f (param $strobe i32) (param $pos i32)
-    (local $adr i32)
-    (local.tee $adr (i32.add (local.get $strobe) (local.get $pos)))
-    (i32.store16 (i32.xor (i32.load16_u (local.get $adr)) (i32.load16_u offset=201 (local.get $strobe))))
-    (i32.store8 offset=167 (local.get $strobe) (i32.xor (i32.load8_u offset=167 (local.get $strobe)) (i32.const 0x80)))
-    (call $keccak_f1600 (local.get $strobe))
-    (i32.store16 offset=200 (local.get $strobe) (i32.const 0))
-  )
+    (func $strobe_squeeze (param $strobe i32) (param $write_adr i32) (param $write_len i32)
+      (local $write_end i32)
+      (local $pos i32)
 
-  (func $_u256_add_0
-    (param $o i32) (param $s i64) (param $x i32) (param $n i64)
-    (result i32) (result i64) (result i32) (result i64)
+      (local.set $write_end (i32.add (local.get $write_adr) (local.get $write_len)))
+      (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
 
-    (i32.add (local.get $o) (i32.const 4))
-    (local.get $s)
-    (i32.add (local.get $x) (i32.const 4))
-    (i64.store32 (local.get $o) (local.tee $n
-      (local.get $n)
-      (i64.add (i64.load32_u (local.get $o)))
-      (i64.add (i64.mul (local.get $s) (i64.load32_u offset=0 (local.get $x))))
-    ))
-    (i64.shr_u (local.get $n) (i64.const 32))
-  )
-
-  ;; *o += (s as u32) * (*x) + n
-  ;; returns overflow
-  (export "_u256_add" (func $_u256_add))
-  (func $_u256_add (param $o i32) (param $s i64) (param $x i32) (param $n i64) (result i32)
-
-    (local.get $o) (local.get $s) (local.get $x) (local.get $n)
-    (call $_u256_add_0)
-    (call $_u256_add_0)
-    (call $_u256_add_0)
-    (call $_u256_add_0)
-    (call $_u256_add_0)
-    (call $_u256_add_0)
-    (call $_u256_add_0)
-    (call $_u256_add_0)
-    (local.set $n) (drop) (drop) (drop)
-
-    (i32.wrap_i64 (local.get $n))
-  )
-
-  ;; *o %= -(*x)
-  (export "u256_mod_neg" (func $u256_mod_neg))
-  (func $u256_mod_neg (param $o i32) (param $x i32)
-    (memory.copy (global.get $u256_mod_tmp) (local.get $o) (i32.const 32))
-    (loop $s
-      (if (call $_u256_add (global.get $u256_mod_tmp) (i64.const 1) (local.get $x) (i64.const 0)) (then
-        (memory.copy (local.get $o) (global.get $u256_mod_tmp) (i32.const 32))
-        (br $s)
-      ))
+      (loop $read
+        (i32.store8 (local.get $write_adr) (i32.load8_u (i32.add (local.get $pos) (local.get $strobe))))
+        (i32.store8 (i32.add (local.get $pos) (local.get $strobe)) (i32.const 0))
+        (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
+        (if (i32.eq (global.get $strobe_r)) (then
+          (call $strobe_run_f (local.get $strobe) (local.get $pos))
+          (local.set $pos (i32.const 0))
+        ))
+        (local.tee $write_adr (i32.add (local.get $write_adr) (i32.const 1)))
+        (br_if $read (i32.lt_u (local.get $write_end)))
+      )
+      (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
     )
-    (memory.fill (global.get $u256_mod_tmp) (i32.const 0) (i32.const 32))
-  )
 
-  (export "coef_add" (func $coef_add))
-  (func $coef_add (param $o i32) (param $x i32)
-    (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 0)))
-    (call $u256_mod_neg (local.get $o) (global.get $neg_coef))
-  )
+    (func $strobe_run_f (param $strobe i32) (param $pos i32)
+      (local $adr i32)
+      (local.tee $adr (i32.add (local.get $strobe) (local.get $pos)))
+      (i32.store16 (i32.xor (i32.load16_u (local.get $adr)) (i32.or (i32.load16_u offset=201 (local.get $strobe)) (i32.const 0x0400))))
+      (i32.store8 offset=167 (local.get $strobe) (i32.xor (i32.load8_u offset=167 (local.get $strobe)) (i32.const 0x80)))
+      (call $keccak_f1600 (local.get $strobe))
+      (i32.store16 offset=200 (local.get $strobe) (i32.const 0))
+    )
 
-  (export "exp_add" (func $exp_add))
-  (func $exp_add (param $o i32) (param $x i32)
-    (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 0)))
-    (call $u256_mod_neg (local.get $o) (global.get $neg_exp))
-  )
+    (func $_u256_add_0
+      (param $o i32) (param $s i64) (param $x i32) (param $n i64)
+      (result i32) (result i64) (result i32) (result i64)
+
+      (i32.add (local.get $o) (i32.const 4))
+      (local.get $s)
+      (i32.add (local.get $x) (i32.const 4))
+      (i64.store32 (local.get $o) (local.tee $n
+        (local.get $n)
+        (i64.add (i64.load32_u (local.get $o)))
+        (i64.add (i64.mul (local.get $s) (i64.load32_u offset=0 (local.get $x))))
+      ))
+      (i64.shr_u (local.get $n) (i64.const 32))
+    )
+
+    ;; *o += (s as u32) * (*x) + n
+    ;; returns overflow
+    (export "_u256_add" (func $_u256_add))
+    (func $_u256_add (param $o i32) (param $s i64) (param $x i32) (param $n i64) (result i32)
+
+      (local.get $o) (local.get $s) (local.get $x) (local.get $n)
+      (call $_u256_add_0)
+      (call $_u256_add_0)
+      (call $_u256_add_0)
+      (call $_u256_add_0)
+      (call $_u256_add_0)
+      (call $_u256_add_0)
+      (call $_u256_add_0)
+      (call $_u256_add_0)
+      (local.set $n) (drop) (drop) (drop)
+
+      (i32.wrap_i64 (local.get $n))
+    )
+
+    ;; *o %= -(*x)
+    (export "u256_mod_neg" (func $u256_mod_neg))
+    (func $u256_mod_neg (param $o i32) (param $x i32)
+      (memory.copy (global.get $u256_mod_tmp) (local.get $o) (i32.const 32))
+      (loop $s
+        (if (call $_u256_add (global.get $u256_mod_tmp) (i64.const 1) (local.get $x) (i64.const 0)) (then
+          (memory.copy (local.get $o) (global.get $u256_mod_tmp) (i32.const 32))
+          (br $s)
+        ))
+      )
+      (memory.fill (global.get $u256_mod_tmp) (i32.const 0) (i32.const 32))
+    )
+
+    (export "coef_add" (func $coef_add))
+    (func $coef_add (param $o i32) (param $x i32)
+      (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 0)))
+      (call $u256_mod_neg (local.get $o) (global.get $neg_coef))
+    )
+
+    (export "exp_add" (func $exp_add))
+    (func $exp_add (param $o i32) (param $x i32)
+      (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 0)))
+      (call $u256_mod_neg (local.get $o) (global.get $neg_exp))
+    )
 
     ;; *o = (*o as u256) + ((*x) * (*y))
     (export "_u256_mul_u512" (func $u256_mul_u512))
@@ -591,6 +647,36 @@
       (drop (call $_u256_add (local.get $o) (i64.const 1) (local.get $x) (i64.const 1)))
     )
 
+    (func $u512_mod_exp (param $x i32) (local $n i32)
+      (local.set $n (i32.add (local.get $x) (i32.const 32)))
+      (loop $n
+        (local.tee $n (i32.sub (local.get $n) (i32.const 1)))
+        (call $u256_mod_neg (global.get $neg_exp))
+        (drop (call $_u256_add
+          (local.get $n)
+          (i64.extend_i32_u
+            (call $_u256_add
+              (local.get $n)
+              (i64.extend_i32_u
+                (call $_u256_add
+                  (local.get $n)
+                  (i64.load8_u offset=32 (local.get $n))
+                  (global.get $u256_mod_exp)
+                  (i64.const 0)
+                )
+              )
+              (global.get $u256_mod_exp)
+              (i64.const 0)
+            )
+          )
+          (global.get $u256_mod_exp)
+          (i64.const 0)
+        ))
+        (call $u256_mod_neg (local.get $n) (global.get $neg_exp))
+        (br_if $n (i32.gt_u (local.get $n) (local.get $x)))
+      )
+    )
+
     ;; o: &coef; x: &coef; y: &coef
     ;; *x *= (*y)
     (export "exp_mul" (func $exp_mul))
@@ -598,19 +684,7 @@
       (local $n i32)
       (call $u256_mul_u512 (global.get $exp_mul_tmp) (local.get $x) (local.get $y))
       (call $u256_mod_neg (global.get $exp_mul_tmp_shr_256) (global.get $neg_exp))
-      (local.set $n (global.get $exp_mul_tmp_shr_256))
-      (loop $n
-        (local.tee $n (i32.sub (local.get $n) (i32.const 1)))
-        (call $u256_mod_neg (global.get $neg_exp))
-        (drop (call $_u256_add
-          (local.get $n)
-          (i64.extend_i32_u (call $_u256_add (local.get $n) (i64.load8_u offset=32 (local.get $n)) (global.get $u256_mod_exp) (i64.const 0)))
-          (global.get $u256_mod_exp)
-          (i64.const 0)
-        ))
-        (call $u256_mod_neg (local.get $n) (global.get $neg_exp))
-        (br_if $n (i32.gt_u (local.get $n) (global.get $exp_mul_tmp)))
-      )
+      (call $u512_mod_exp (global.get $exp_mul_tmp))
       (memory.copy (local.get $x) (global.get $exp_mul_tmp) (i32.const 32))
       (memory.fill (global.get $exp_mul_tmp) (i32.const 0) (i32.const 64))
     )
@@ -962,15 +1036,16 @@
     )
 
     (func $curve_pow (param $o i32) (param $x i32) (param $e i32)
+      (memory.copy (local.get $o) (global.get $rist_zero) (i32.const 128))
       (call $pow (local.get $o) (local.get $x) (local.get $e) (i32.const 2) (i32.const 3))
     )
 
-    (data $strobe_init_data "\01\a8\01\00\01\60STROBEV1.0.2")
+    (data $strobe_init_data "\01\a8\01\00\01\60STROBEv1.0.2")
     (func $signing_init (param $strobe i32)
       (param $msg_adr i32) (param $msg_len i32)
       (param $pub_adr i32)
 
-      (memory.init (local.get $strobe) (i32.const 0) (i32.const 18))
+      (memory.init $strobe_init_data (local.get $strobe) (i32.const 0) (i32.const 18))
       (call $keccak_f1600 (local.get $strobe))
 
       (call $strobe_begin_op (local.get $strobe) (global.get $strobe_ma))
@@ -1002,33 +1077,55 @@
       )
     )
 
-    (func $sign (param $strobe0 i32) (param $strobe1 i32)
+    (export "sign" (func $sign))
+    (func $sign
       (param $msg_adr i32) (param $msg_len i32)
       (param $pub_adr i32)
       (param $key_adr i32)
       (param $rng_adr i32)
+      (param $r i32)
+      (local $s i32)
 
-      (call $signing_init (local.get $strobe0) (local.get $msg_adr) (local.get $msg_len) (local.get $pub_adr))
-      (call $strobe_begin_op (local.get $strobe0) (global.get $strobe_ma))
+      (local.set $s (i32.add (local.get $r) (i32.const 32)))
 
-      (memory.copy (local.get $strobe1) (local.get $strobe0) (i32.const 256))
-      (call $merlin_rekey (local.get $strobe1)
+      (call $signing_init (global.get $sign_tmp_strobe0) (local.get $msg_adr) (local.get $msg_len) (local.get $pub_adr))
+
+      (memory.copy (global.get $sign_tmp_strobe1) (global.get $sign_tmp_strobe0) (i32.const 256))
+      (call $merlin_rekey (global.get $sign_tmp_strobe1)
         (global.get $str_signing_adr) (global.get $str_signing_len)
-        (global.get $key_adr) (global.get $rng_adr)
+        (i32.add (local.get $key_adr) (i32.const 32)) (i32.const 32)
       )
 
-      (call $strobe_begin_op (local.get $strobe1) (global.get $strobe_ma))
-      (call $strobe_absorb (local.get $strobe1) (global.get $str_rng_adr) (global.get $str_rng_len))
-      (call $strobe_begin_op (local.get $strobe1) (global.get $strobe_ac))
-      (call $strobe_overwrite (local.get $strobe1) (global.get $rng_adr) (i32.const 32))
+      (call $strobe_begin_op (global.get $sign_tmp_strobe1) (global.get $strobe_ma))
+      (call $strobe_absorb (global.get $sign_tmp_strobe1) (global.get $str_rng_adr) (global.get $str_rng_len))
+      (call $strobe_begin_op (global.get $sign_tmp_strobe1) (global.get $strobe_ac))
+      (call $strobe_overwrite (global.get $sign_tmp_strobe1) (local.get $rng_adr) (i32.const 32))
 
-      ;; fill_bytes 512
-      ;; mod exp
-      ;; this is r
+      (call $merlin_challenge_bytes (global.get $sign_tmp_strobe1)
+        (i32.const 0) (i32.const 0)
+        (global.get $sign_tmp_k) (i32.const 64)
+      )
+      (call $u512_mod_exp (global.get $sign_tmp_k))
 
-      ;; R = pow(basepoint, r)
+      (call $curve_pow (global.get $sign_tmp_r) (global.get $rist_basepoint) (global.get $sign_tmp_k))
+      (call $rist_encode (local.get $r) (global.get $sign_tmp_r))
 
-      ;; ...
+      (call $merlin_append_message (global.get $sign_tmp_strobe0)
+        (global.get $str_sign_r_adr) (global.get $str_sign_r_len)
+        (local.get $r) (i32.const 32)
+      )
+
+      (call $merlin_challenge_bytes (global.get $sign_tmp_strobe0)
+        (global.get $str_sign_c_adr) (global.get $str_sign_c_len)
+        (global.get $sign_tmp_e) (i32.const 64)
+      )
+      (call $u512_mod_exp (global.get $sign_tmp_e))
+      (memory.copy (local.get $s) (global.get $sign_tmp_e) (i32.const 32))
+      (call $exp_mul (local.get $s) (local.get $key_adr))
+      (call $exp_add (local.get $s) (global.get $sign_tmp_k))
+
+      (i32.store8 offset=63 (local.get $r) (i32.or (i32.load8_u offset=63 (local.get $r)) (i32.const 128)))
+      ;; (memory.fill (global.get $sign_tmp_k) (i32.const 0) (i32.const 1280))
     )
   )
   
