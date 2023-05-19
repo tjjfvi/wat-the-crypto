@@ -1,1 +1,1 @@
-export * from "./blake2b.ts"
+export { sign } from "./sr25519.ts"

@@ -1,6 +1,8 @@
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
 import { decodeHex, encodeHex } from "../common/hex.ts"
-import { mem, readU256, wasm } from "./sr25519.ts"
+import { instantiate } from "./sr25519.ts"
+
+const { mem, wasm } = instantiate()
 
 const cases: [string, number?][] = [
   ["0000000000000000000000000000000000000000000000000000000000000000", 0],
@@ -61,24 +63,20 @@ for (let i = 0; i < 2048; i++) {
   cases.push([encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32))])
 }
 
-for (const [hex, out] of cases) {
-  mem.set(decodeHex(hex), wasm.free_adr.value)
-  const r = wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
-  if (out) {
-    assertEquals(r, out)
-  }
-  if (r === 0) {
-    mem.set(new Uint8Array(32), wasm.free_adr.value)
-    if (hex === "0000000000000000000000000000000000000000000000000000000000000000") {
-      console.log(readU256(wasm.free_adr.value + 32))
-      console.log(readU256(wasm.free_adr.value + 32 * 2))
-      console.log(readU256(wasm.free_adr.value + 32 * 3))
-      console.log(readU256(wasm.free_adr.value + 32 * 4))
+Deno.test("rist decode encode", () => {
+  for (const [hex, out] of cases) {
+    mem.set(decodeHex(hex), wasm.free_adr.value)
+    const r = wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
+    if (out) {
+      assertEquals(r, out)
     }
-    wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
-    assertEquals(encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)), hex)
+    if (r === 0) {
+      mem.set(new Uint8Array(32), wasm.free_adr.value)
+      wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
+      assertEquals(encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)), hex)
+    }
   }
-}
+})
 
 const doublings = [
   [cases[0]![0], cases[0]![0]],
@@ -88,19 +86,21 @@ const doublings = [
   [cases[4]![0], cases[8]![0]],
 ] as const
 
-for (const [a, b] of doublings) {
-  mem.set(
-    decodeHex(a),
-    wasm.free_adr.value,
-  )
-  wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
-  wasm.curve_dbl(wasm.free_adr.value + 32)
-  wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
-  assertEquals(
-    encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)),
-    b,
-  )
-}
+Deno.test("rist double", () => {
+  for (const [a, b] of doublings) {
+    mem.set(
+      decodeHex(a),
+      wasm.free_adr.value,
+    )
+    wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
+    wasm.curve_dbl(wasm.free_adr.value + 32)
+    wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
+    assertEquals(
+      encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)),
+      b,
+    )
+  }
+})
 
 const adds = [
   [cases[0]![0], cases[0]![0], cases[0]![0]],
@@ -112,21 +112,23 @@ const adds = [
   [cases[3]![0], cases[4]![0], cases[7]![0]],
 ] as const
 
-for (const [a, b, c] of adds) {
-  mem.set(
-    decodeHex(a),
-    wasm.free_adr.value,
-  )
-  mem.set(
-    decodeHex(b),
-    wasm.free_adr.value + 32 * 5,
-  )
-  wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
-  wasm.rist_decode(wasm.free_adr.value + 32 * 6, wasm.free_adr.value + 32 * 5)
-  wasm.curve_add(wasm.free_adr.value + 32, wasm.free_adr.value + 32 * 6)
-  wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
-  assertEquals(
-    encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)),
-    c,
-  )
-}
+Deno.test("rist add", () => {
+  for (const [a, b, c] of adds) {
+    mem.set(
+      decodeHex(a),
+      wasm.free_adr.value,
+    )
+    mem.set(
+      decodeHex(b),
+      wasm.free_adr.value + 32 * 5,
+    )
+    wasm.rist_decode(wasm.free_adr.value + 32, wasm.free_adr.value)
+    wasm.rist_decode(wasm.free_adr.value + 32 * 6, wasm.free_adr.value + 32 * 5)
+    wasm.curve_add(wasm.free_adr.value + 32, wasm.free_adr.value + 32 * 6)
+    wasm.rist_encode(wasm.free_adr.value, wasm.free_adr.value + 32)
+    assertEquals(
+      encodeHex(mem.slice(wasm.free_adr.value, wasm.free_adr.value + 32)),
+      c,
+    )
+  }
+})

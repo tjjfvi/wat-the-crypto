@@ -223,7 +223,7 @@
   ;; 512 bytes
   (global $sign_tmp_e i32 (i32.const 3276))
 
-  (global (export "free_adr") i32 (i32.const 3788))
+  (global (export "free_adr") i32 (i32.const 4000))
 
   (func $_keccak_0 (param $adr i32) (result i32) (result i64)
     (i32.add (local.get $adr) (i32.const 8))
@@ -427,6 +427,8 @@
     (i32.store8 offset=200 (local.get $strobe) (local.get $pos))
   )
 
+    ;; <-- form.wat bug?
+
     (global $strobe_r i32 (i32.const 166))
 
     (func $strobe_absorb (param $strobe i32) (param $read_adr i32) (param $read_len i32)
@@ -458,10 +460,8 @@
       (local.set $read_end (i32.add (local.get $read_adr) (local.get $read_len)))
       (local.set $pos (i32.load8_u offset=200 (local.get $strobe)))
 
-      (call $log_brk)
-
       (loop $read
-        (i32.store8 (i32.add (local.get $pos) (local.get $strobe)) (i32.load8_u (local.get $read_adr) (call $dbg_u32)) (call $dbg_u32))
+        (i32.store8 (i32.add (local.get $pos) (local.get $strobe)) (i32.load8_u (local.get $read_adr)))
         (local.tee $pos (i32.add (local.get $pos) (i32.const 1)))
         (if (i32.eq (global.get $strobe_r)) (then
           (call $strobe_run_f (local.get $strobe) (local.get $pos))
@@ -976,8 +976,6 @@
       (call $coef_mul (local.get $t) (global.get $curve_tmp_cy))
     )
 
-    ;; <-- form.wat bug?
-
     (export "curve_add" (func $curve_add))
     (func $curve_add (param $ax i32) (param $bx i32)
       (local $ay i32) (local $az i32) (local $at i32)
@@ -1125,7 +1123,7 @@
       (call $exp_add (local.get $s) (global.get $sign_tmp_k))
 
       (i32.store8 offset=63 (local.get $r) (i32.or (i32.load8_u offset=63 (local.get $r)) (i32.const 128)))
-      ;; (memory.fill (global.get $sign_tmp_k) (i32.const 0) (i32.const 1280))
+      (memory.fill (global.get $sign_tmp_k) (i32.const 0) (i32.const 1280))
     )
   )
   
