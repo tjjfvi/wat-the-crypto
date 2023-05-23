@@ -11,9 +11,9 @@ const wasmPaths = [
 ]
 
 let success = true
-await Promise.all(wasmPaths.map((path) =>
-  build(path).catch((error) => {
-    console.error(`${path}:`, error)
+await Promise.all(wasmPaths.map((wasmPath) =>
+  build(wasmPath).catch((error) => {
+    console.error(`${wasmPath}:`, error)
     success = false
   })
 ))
