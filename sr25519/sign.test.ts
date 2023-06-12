@@ -6,14 +6,21 @@ const secret = secretFromSeed64(
   new Uint8Array(await crypto.subtle.digest("SHA-512", new Uint8Array(32))),
 )
 
-assertEquals(
-  encodeHex(secret),
-  "5046adc1dba838867b2bbbfdd0c3423e58b57970b5267a90f57960924a87f1560a6a85eaa642dac835424b5d7c8d637c00408c7a73da672b7f498521420b6dd3",
-)
+Deno.test("secret derivation", () => {
+  assertEquals(
+    encodeHex(secret),
+    "5046adc1dba838867b2bbbfdd0c3423e58b57970b5267a90f57960924a87f1560a6a85eaa642dac835424b5d7c8d637c00408c7a73da672b7f498521420b6dd3",
+  )
+})
 
 const pubkey = derivePubkey(secret)
 
-assertEquals(encodeHex(pubkey), "def12e42f3e487e9b14095aa8d5cc16a33491f1b50dadcf8811d1480f3fa8627")
+Deno.test("pubkey derivation", () => {
+  assertEquals(
+    encodeHex(pubkey),
+    "def12e42f3e487e9b14095aa8d5cc16a33491f1b50dadcf8811d1480f3fa8627",
+  )
+})
 
 const ctx = new TextEncoder().encode("substrate")
 
