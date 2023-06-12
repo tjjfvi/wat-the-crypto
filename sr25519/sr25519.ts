@@ -5,10 +5,6 @@ import keccakCode from "./keccak.wasm.ts"
 import ristrettoCode from "./ristretto.wasm.ts"
 import sr25519Code from "./sr25519.wasm.ts"
 
-console.log(keccakCode.length, "bytes of wasm")
-console.log(ristrettoCode.length, "bytes of wasm")
-console.log(sr25519Code.length, "bytes of wasm")
-
 export const { sign, derivePubkey } = instantiate()
 
 export function instantiate() {
@@ -80,6 +76,8 @@ export function instantiate() {
     curve_add(x: number, y: number): void
 
     sign(
+      ctx_adr: number,
+      ctx_len: number,
       msg_adr: number,
       msg_len: number,
       pub_adr: number,
@@ -166,6 +164,7 @@ export function instantiate() {
   writeU256(wasm.rist_zero.value + 64, 1n)
 
   function sign(
+    ctx: Uint8Array,
     secret: Uint8Array,
     pubkey: Uint8Array,
     msg: Uint8Array,
@@ -177,12 +176,16 @@ export function instantiate() {
     const pubkeyAdr = secretAdr + 64
     const randAdr = pubkeyAdr + 32
     const sigAdr = randAdr + 32
-    const msgAdr = sigAdr + 64
+    const ctxAdr = sigAdr + 64
+    const msgAdr = ctxAdr + ctx.length
+    mem.set(ctx, ctxAdr)
     mem.set(secret, secretAdr)
     mem.set(pubkey, pubkeyAdr)
     mem.set(msg, msgAdr)
     mem.set(rand, randAdr)
     wasm.sign(
+      ctxAdr,
+      ctx.length,
       msgAdr,
       msg.length,
       pubkeyAdr,
@@ -205,7 +208,7 @@ export function instantiate() {
       pubkeyAdr,
     )
     const pubkey = mem.slice(pubkeyAdr, pubkeyAdr + 32)
-    mem.fill(0, secretAdr, pubkeyAdr + 32)
+    mem.fill(0, secretAdr, 64)
     return pubkey
   }
 

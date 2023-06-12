@@ -66,10 +66,7 @@
   (global $str_sign_c_len i32 (i32.const 6))
   (data (i32.const 1715) "sign:c")
 
-  ;; 9 bytes
-  (global $str_ctx_adr i32 (i32.const 1721))
-  (global $str_ctx_len i32 (i32.const 9))
-  (data (i32.const 1721) "substrate")
+  ;; 9 bytes gap
 
   ;; 3 bytes
   (global $str_rng_adr i32 (i32.const 1730))
@@ -268,6 +265,7 @@
 
   (data $strobe_init_data "\01\a8\01\00\01\60STROBEv1.0.2")
   (func $signing_init (param $strobe i32)
+    (param $ctx_adr i32) (param $ctx_len i32)
     (param $msg_adr i32) (param $msg_len i32)
     (param $pub_adr i32)
 
@@ -284,7 +282,7 @@
 
     (call $merlin_append_message (local.get $strobe)
       (i32.const 0) (i32.const 0)
-      (global.get $str_ctx_adr) (global.get $str_ctx_len)
+      (local.get $ctx_adr) (local.get $ctx_len)
     )
 
     (call $merlin_append_message (local.get $strobe)
@@ -332,6 +330,7 @@
   )
 
   (func (export "sign")
+    (param $ctx_adr i32) (param $ctx_len i32)
     (param $msg_adr i32) (param $msg_len i32)
     (param $pub_adr i32)
     (param $key_adr i32)
@@ -343,7 +342,12 @@
 
     (local.set $s (i32.add (local.get $r) (i32.const 32)))
 
-    (call $signing_init (global.get $sign_tmp_strobe0) (local.get $msg_adr) (local.get $msg_len) (local.get $pub_adr))
+    (call $signing_init
+      (global.get $sign_tmp_strobe0)
+      (local.get $ctx_adr) (local.get $ctx_len)
+      (local.get $msg_adr) (local.get $msg_len)
+      (local.get $pub_adr)
+    )
 
     (memory.copy (global.get $sign_tmp_strobe1) (global.get $sign_tmp_strobe0) (i32.const 256))
     (call $merlin_rekey (global.get $sign_tmp_strobe1)

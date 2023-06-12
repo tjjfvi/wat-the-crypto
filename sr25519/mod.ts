@@ -14,7 +14,7 @@ export class Sr25519 {
     return Sr25519.fromSecret(secretFromSeed64(seed))
   }
 
-  sign(msg: Uint8Array) {
-    return sign(this.secretKey, this.publicKey, msg)
+  sign(ctx: Uint8Array, msg: Uint8Array) {
+    return sign(ctx, this.secretKey, this.publicKey, msg)
   }
 }
