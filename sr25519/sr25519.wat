@@ -303,6 +303,62 @@
     )
   )
 
+  (func $u256_shr_3 (param $n i32) (local $x i64)
+    (i64.store offset=24
+      (local.get $n)
+      (i64.shr_u (local.tee $x (i64.load offset=24 (local.get $n))) (i64.const 3))
+    )
+    (i64.store offset=16
+      (local.get $n)
+      (i64.or
+        (i64.shl (local.get $x) (i64.const 61))
+        (i64.shr_u (local.tee $x (i64.load offset=16 (local.get $n))) (i64.const 3))
+      )
+    )
+    (i64.store offset=8
+      (local.get $n)
+      (i64.or
+        (i64.shl (local.get $x) (i64.const 61))
+        (i64.shr_u (local.tee $x (i64.load offset=8 (local.get $n))) (i64.const 3))
+      )
+    )
+    (i64.store offset=0
+      (local.get $n)
+      (i64.or
+        (i64.shl (local.get $x) (i64.const 61))
+        (i64.shr_u (local.tee $x (i64.load offset=0 (local.get $n))) (i64.const 3))
+      )
+    )
+  )
+
+  (func $u256_shl_3 (param $n i32) (local $x i64)
+    (i64.store offset=0
+      (local.get $n)
+      (i64.shl (local.tee $x (i64.load offset=0 (local.get $n))) (i64.const 3))
+    )
+    (i64.store offset=8
+      (local.get $n)
+      (i64.or
+        (i64.shr_u (local.get $x) (i64.const 61))
+        (i64.shl (local.tee $x (i64.load offset=8 (local.get $n))) (i64.const 3))
+      )
+    )
+    (i64.store offset=16
+      (local.get $n)
+      (i64.or
+        (i64.shr_u (local.get $x) (i64.const 61))
+        (i64.shl (local.tee $x (i64.load offset=16 (local.get $n))) (i64.const 3))
+      )
+    )
+    (i64.store offset=24
+      (local.get $n)
+      (i64.or
+        (i64.shr_u (local.get $x) (i64.const 61))
+        (i64.shl (local.tee $x (i64.load offset=24 (local.get $n))) (i64.const 3))
+      )
+    )
+  )
+
   (export "sign" (func $sign))
   (func $sign
     (param $msg_adr i32) (param $msg_len i32)
@@ -311,6 +367,8 @@
     (param $rng_adr i32)
     (param $r i32)
     (local $s i32)
+
+    (call $u256_shr_3 (local.get $key_adr))
 
     (local.set $s (i32.add (local.get $r) (i32.const 32)))
 

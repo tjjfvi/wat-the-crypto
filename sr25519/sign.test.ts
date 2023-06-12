@@ -3,7 +3,7 @@ import { decodeHex, encodeHex } from "../common/hex.ts"
 import { sign } from "./sr25519.ts"
 
 const secret = decodeHex(
-  "caa835781b15c7706f65b71f7a58c807ab360faed6440fb23e0f4c52e930de0a0a6a85eaa642dac835424b5d7c8d637c00408c7a73da672b7f498521420b6dd3",
+  "5046adc1dba838867b2bbbfdd0c3423e58b57970b5267a90f57960924a87f1560a6a85eaa642dac835424b5d7c8d637c00408c7a73da672b7f498521420b6dd3",
 )
 const pubkey = decodeHex(
   "def12e42f3e487e9b14095aa8d5cc16a33491f1b50dadcf8811d1480f3fa8627",
