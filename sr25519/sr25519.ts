@@ -1,4 +1,3 @@
-import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
 import { u256 as $u256 } from "https://deno.land/x/scale@v0.11.2/codecs/int.ts"
 // import { log } from "../common/log.ts"
 import keccakCode from "./keccak.wasm.ts"
@@ -170,8 +169,8 @@ export function instantiate() {
     msg: Uint8Array,
     rand = crypto.getRandomValues(new Uint8Array(32)),
   ) {
-    assertEquals(secret.length, 64)
-    assertEquals(pubkey.length, 32)
+    if (secret.length !== 64) throw new Error("Invalid secret")
+    if (pubkey.length !== 32) throw new Error("Invalid pubkey")
     const secretAdr = wasm.free_adr.value
     const pubkeyAdr = secretAdr + 64
     const randAdr = pubkeyAdr + 32
@@ -199,7 +198,7 @@ export function instantiate() {
   }
 
   function derivePubkey(secret: Uint8Array) {
-    assertEquals(secret.length, 64)
+    if (secret.length !== 64) throw new Error("Invalid secret")
     const secretAdr = wasm.free_adr.value
     const pubkeyAdr = secretAdr + 64
     mem.set(secret, secretAdr)
@@ -237,7 +236,7 @@ export function instantiate() {
 }
 
 export function secretFromSeed64(seed: Uint8Array) {
-  assertEquals(seed.length, 64)
+  if (seed.length !== 64) throw new Error("Invalid seed")
   const secret = seed.slice()
   secret[0] &= 248
   secret[31] &= 63
