@@ -6,6 +6,60 @@ import sr25519Code from "./sr25519.wasm.ts"
 
 export const { sign, derivePubkey } = instantiate()
 
+export interface Wasm {
+  keccak_rc_adr: WebAssembly.Global
+  field: WebAssembly.Global
+  scalar: WebAssembly.Global
+  neg_field: WebAssembly.Global
+  neg_scalar: WebAssembly.Global
+  u256_mod_scalar: WebAssembly.Global
+  field_neg_two: WebAssembly.Global
+  rist_d: WebAssembly.Global
+  field_invsqrt_pow: WebAssembly.Global
+  field_i: WebAssembly.Global
+  field_neg_i: WebAssembly.Global
+  field_neg_one: WebAssembly.Global
+  rist_inv_root_a_sub_d: WebAssembly.Global
+  curve_a: WebAssembly.Global
+  rist_2d: WebAssembly.Global
+  rist_basepoint: WebAssembly.Global
+  rist_zero: WebAssembly.Global
+  free_adr: WebAssembly.Global
+
+  keccak_f1600(adr: number): void
+
+  _u256_add(o: number, s: bigint, x: number, n: bigint): number
+  u256_sub(o: number, x: number, y: number): number
+  u256_mod_neg(x: number, y: number): number
+  _u256_mul_u512(o: number, x: number, y: number): void
+  field_add(o: number, x: number): void
+  field_mul(x: number, y: number): void
+  scalar_add(o: number, x: number): void
+  scalar_mul(x: number, y: number): void
+  field_invsqrt(o: number): number
+
+  rist_decode(o: number, s: number): number
+  rist_encode(o: number, x: number): number
+
+  curve_dbl(x: number): void
+  curve_add(x: number, y: number): void
+
+  sign(
+    ctx_adr: number,
+    ctx_len: number,
+    msg_adr: number,
+    msg_len: number,
+    pub_adr: number,
+    key_adr: number,
+    rng_adr: number,
+    sig_adr: number,
+  ): void
+  get_pub(
+    key_adr: number,
+    pub_adr: number,
+  ): void
+}
+
 export function instantiate() {
   const u512 = 1n << 512n
   const u256 = 1n << 256n
@@ -35,60 +89,6 @@ export function instantiate() {
     ristretto: ristrettoInstance.exports,
     // log,
   })
-
-  interface Wasm {
-    keccak_rc_adr: WebAssembly.Global
-    field: WebAssembly.Global
-    scalar: WebAssembly.Global
-    neg_field: WebAssembly.Global
-    neg_scalar: WebAssembly.Global
-    u256_mod_scalar: WebAssembly.Global
-    field_neg_two: WebAssembly.Global
-    rist_d: WebAssembly.Global
-    field_invsqrt_pow: WebAssembly.Global
-    field_i: WebAssembly.Global
-    field_neg_i: WebAssembly.Global
-    field_neg_one: WebAssembly.Global
-    rist_inv_root_a_sub_d: WebAssembly.Global
-    curve_a: WebAssembly.Global
-    rist_2d: WebAssembly.Global
-    rist_basepoint: WebAssembly.Global
-    rist_zero: WebAssembly.Global
-    free_adr: WebAssembly.Global
-
-    keccak_f1600(adr: number): void
-
-    _u256_add(o: number, s: bigint, x: number, n: bigint): number
-    u256_sub(o: number, x: number, y: number): number
-    u256_mod_neg(x: number, y: number): number
-    _u256_mul_u512(o: number, x: number, y: number): void
-    field_add(o: number, x: number): void
-    field_mul(x: number, y: number): void
-    scalar_add(o: number, x: number): void
-    scalar_mul(x: number, y: number): void
-    field_invsqrt(o: number): number
-
-    rist_decode(o: number, s: number): number
-    rist_encode(o: number, x: number): number
-
-    curve_dbl(x: number): void
-    curve_add(x: number, y: number): void
-
-    sign(
-      ctx_adr: number,
-      ctx_len: number,
-      msg_adr: number,
-      msg_len: number,
-      pub_adr: number,
-      key_adr: number,
-      rng_adr: number,
-      sig_adr: number,
-    ): void
-    get_pub(
-      key_adr: number,
-      pub_adr: number,
-    ): void
-  }
 
   const wasm = {
     ...keccakInstance.exports,
