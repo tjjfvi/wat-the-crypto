@@ -8,8 +8,9 @@ const { check } = flags.parse(Deno.args, { boolean: ["check"] })
 const wasmPaths = [
   "xxhash/xxhash",
   "blake2b/blake2b",
-  "sr25519/sr25519",
   "sr25519/keccak",
+  "sr25519/ristretto",
+  "sr25519/sr25519",
 ]
 
 let success = true

@@ -2,8 +2,11 @@ import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
 import { u256 as $u256 } from "https://deno.land/x/scale@v0.11.2/codecs/int.ts"
 // import { log } from "../common/log.ts"
 import keccakCode from "./keccak.wasm.ts"
+import ristrettoCode from "./ristretto.wasm.ts"
 import sr25519Code from "./sr25519.wasm.ts"
 
+console.log(keccakCode.length, "bytes of wasm")
+console.log(ristrettoCode.length, "bytes of wasm")
 console.log(sr25519Code.length, "bytes of wasm")
 
 export const { sign } = instantiate()
@@ -24,10 +27,17 @@ export function instantiate() {
     // log,
   })
 
+  const ristrettoModule = new WebAssembly.Module(ristrettoCode)
+  const ristrettoInstance = new WebAssembly.Instance(ristrettoModule, {
+    host: { memory },
+    // log,
+  })
+
   const sr25519Module = new WebAssembly.Module(sr25519Code)
   const sr25519Instance = new WebAssembly.Instance(sr25519Module, {
     host: { memory },
     keccak: keccakInstance.exports,
+    ristretto: ristrettoInstance.exports,
     // log,
   })
 
@@ -81,6 +91,7 @@ export function instantiate() {
 
   const wasm = {
     ...keccakInstance.exports,
+    ...ristrettoInstance.exports,
     ...sr25519Instance.exports,
   } as never as Wasm
   const mem = new Uint8Array(memory.buffer)
