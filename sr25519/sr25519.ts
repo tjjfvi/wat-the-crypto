@@ -9,7 +9,7 @@ console.log(keccakCode.length, "bytes of wasm")
 console.log(ristrettoCode.length, "bytes of wasm")
 console.log(sr25519Code.length, "bytes of wasm")
 
-export const { sign } = instantiate()
+export const { sign, derivePubkey } = instantiate()
 
 export function instantiate() {
   const u512 = 1n << 512n
@@ -86,6 +86,10 @@ export function instantiate() {
       key_adr: number,
       rng_adr: number,
       sig_adr: number,
+    ): void
+    get_pub(
+      key_adr: number,
+      pub_adr: number,
     ): void
   }
 
@@ -191,6 +195,20 @@ export function instantiate() {
     return sig
   }
 
+  function derivePubkey(secret: Uint8Array) {
+    assertEquals(secret.length, 64)
+    const secretAdr = wasm.free_adr.value
+    const pubkeyAdr = secretAdr + 64
+    mem.set(secret, secretAdr)
+    wasm.get_pub(
+      secretAdr,
+      pubkeyAdr,
+    )
+    const pubkey = mem.slice(pubkeyAdr, pubkeyAdr + 32)
+    mem.fill(0, secretAdr, pubkeyAdr + 32)
+    return pubkey
+  }
+
   function readU256(adr: number) {
     return $u256.decode(mem.subarray(adr, adr + 32))
   }
@@ -199,5 +217,27 @@ export function instantiate() {
     mem.subarray(adr, adr + 32).set($u256.encode(value))
   }
 
-  return { readU256, writeU256, wasm, mem, u256, u512, field, scalar, ristD, fieldI, sign }
+  return {
+    readU256,
+    writeU256,
+    wasm,
+    mem,
+    u256,
+    u512,
+    field,
+    scalar,
+    ristD,
+    fieldI,
+    sign,
+    derivePubkey,
+  }
+}
+
+export function secretFromSeed64(seed: Uint8Array) {
+  assertEquals(seed.length, 64)
+  const secret = seed.slice()
+  secret[0] &= 248
+  secret[31] &= 63
+  secret[31] |= 64
+  return secret
 }

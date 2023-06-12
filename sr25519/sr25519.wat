@@ -331,36 +331,7 @@
     )
   )
 
-  (func $u256_shl_3 (param $n i32) (local $x i64)
-    (i64.store offset=0
-      (local.get $n)
-      (i64.shl (local.tee $x (i64.load offset=0 (local.get $n))) (i64.const 3))
-    )
-    (i64.store offset=8
-      (local.get $n)
-      (i64.or
-        (i64.shr_u (local.get $x) (i64.const 61))
-        (i64.shl (local.tee $x (i64.load offset=8 (local.get $n))) (i64.const 3))
-      )
-    )
-    (i64.store offset=16
-      (local.get $n)
-      (i64.or
-        (i64.shr_u (local.get $x) (i64.const 61))
-        (i64.shl (local.tee $x (i64.load offset=16 (local.get $n))) (i64.const 3))
-      )
-    )
-    (i64.store offset=24
-      (local.get $n)
-      (i64.or
-        (i64.shr_u (local.get $x) (i64.const 61))
-        (i64.shl (local.tee $x (i64.load offset=24 (local.get $n))) (i64.const 3))
-      )
-    )
-  )
-
-  (export "sign" (func $sign))
-  (func $sign
+  (func (export "sign")
     (param $msg_adr i32) (param $msg_len i32)
     (param $pub_adr i32)
     (param $key_adr i32)
@@ -410,5 +381,11 @@
 
     (i32.store8 offset=63 (local.get $r) (i32.or (i32.load8_u offset=63 (local.get $r)) (i32.const 128)))
     (memory.fill (global.get $sign_tmp_k) (i32.const 0) (i32.const 1280))
+  )
+
+  (func (export "get_pub") (param $key_adr i32) (param $pub_adr i32)
+    (call $u256_shr_3 (local.get $key_adr))
+    (call $curve_pow (global.get $sign_tmp_r) (global.get $rist_basepoint) (local.get $key_adr))
+    (call $rist_encode (local.get $pub_adr) (global.get $sign_tmp_r))
   )
 )

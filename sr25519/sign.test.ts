@@ -1,13 +1,19 @@
 import { assertEquals } from "https://deno.land/std@0.163.0/testing/asserts.ts"
-import { decodeHex, encodeHex } from "../common/hex.ts"
-import { sign } from "./sr25519.ts"
+import { encodeHex } from "../common/hex.ts"
+import { derivePubkey, secretFromSeed64, sign } from "./sr25519.ts"
 
-const secret = decodeHex(
+const secret = secretFromSeed64(
+  new Uint8Array(await crypto.subtle.digest("SHA-512", new Uint8Array(32))),
+)
+
+assertEquals(
+  encodeHex(secret),
   "5046adc1dba838867b2bbbfdd0c3423e58b57970b5267a90f57960924a87f1560a6a85eaa642dac835424b5d7c8d637c00408c7a73da672b7f498521420b6dd3",
 )
-const pubkey = decodeHex(
-  "def12e42f3e487e9b14095aa8d5cc16a33491f1b50dadcf8811d1480f3fa8627",
-)
+
+const pubkey = derivePubkey(secret)
+
+assertEquals(encodeHex(pubkey), "def12e42f3e487e9b14095aa8d5cc16a33491f1b50dadcf8811d1480f3fa8627")
 
 Deno.test("sign 'hello world' rand 0", () => {
   assertEquals(
