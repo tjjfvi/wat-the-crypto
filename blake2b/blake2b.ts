@@ -1,5 +1,5 @@
+import { Hasher } from "../common/hasher.ts"
 import wasmCode from "./blake2b.wasm.ts"
-import { Hasher } from "./common.ts"
 
 const memory = new WebAssembly.Memory({ initial: 1, maximum: 128 })
 

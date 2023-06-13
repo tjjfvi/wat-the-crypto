@@ -2,8 +2,8 @@
 
 import { DigestAlgorithm } from "https://deno.land/std@0.163.0/crypto/_wasm/mod.ts"
 import { crypto } from "https://deno.land/std@0.163.0/crypto/mod.ts"
-import { Hasher } from "../common.ts"
-import { testCases } from "../test/test_util.ts"
+import { Hasher } from "./hasher.ts"
+import { testCases } from "./test_util.ts"
 
 interface BenchHasherProps {
   name: string
